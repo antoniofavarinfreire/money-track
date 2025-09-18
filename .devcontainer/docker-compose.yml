@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+    ports:
+      - "3000:3000" # expõe o backend (se rodar API aqui)
+      - "5173:5173" # expõe o Vite (frontend)
+    command: sleep infinity
+    depends_on:
+      - db
+    networks:
+      - devnet
+
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - devnet
+
+networks:
+  devnet:
+
+volumes:
+  postgres-data:
