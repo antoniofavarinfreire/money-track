@@ -14,7 +14,7 @@ const routes = [
   },
   {
     path: "/",
-    redirect: "/login", // 👈 sempre começa no login
+    redirect: "/login",
   },
   {
     path: "/app",
