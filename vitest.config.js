@@ -19,7 +19,6 @@ export default defineConfig({
       reportsDirectory: "coverage",
     },
     setupFiles: ["./vitest.setup.js"],
-    // Transforma arquivos de asset em strings
     transformMode: {
       web: [/\.[jt]sx?$/],
     },
