@@ -8,15 +8,26 @@
       <section class="login-card" aria-labelledby="login-title">
         <img src="@/assets/img/logo_money_track.png" alt="" />
         <h3>Money Track</h3>
-
+        <h4>Registre-se</h4>
         <form @submit.prevent="submit" class="form" novalidate>
+          <label class="field">
+            <span class="label-text">Nome Usuário</span>
+            <input
+              v-model="name"
+              type="text"
+              required
+              placeholder="Seu nome"
+              autocomplete="username"
+            />
+            <small v-if="errors.name" class="error">{{ errors.name }}</small>
+          </label>
           <label class="field">
             <span class="label-text">E‑mail</span>
             <input
               v-model="email"
               type="email"
               required
-              placeholder="seu@exemplo.com"
+              placeholder="seu@email.com"
               autocomplete="username"
             />
             <small v-if="errors.email" class="error">{{ errors.email }}</small>
@@ -32,149 +43,106 @@
                 placeholder="••••••••"
                 autocomplete="current-password"
               />
-              <button
-                type="button"
-                class="toggle"
-                @click="showPassword = !showPassword"
-                :aria-pressed="showPassword"
-              >
-                {{ showPassword ? "Ocultar" : "Mostrar" }}
-              </button>
             </div>
             <small v-if="errors.password" class="error">{{
               errors.password
             }}</small>
           </label>
 
-          <div class="row between">
-            <label class="checkbox">
-              <input type="checkbox" v-model="remember" />
-              <span>Lembrar-me</span>
-            </label>
-
-            <a href="#" class="forgot" @click.prevent="forgot"
-              >Esqueceu a senha?</a
-            >
-          </div>
-
+          <label class="field">
+            <span class="label-text">Confirmar Senha</span>
+            <div class="password-row">
+              <input
+                v-model="confirmpassword"
+                :type="showPassword ? 'text' : 'password'"
+                required
+                placeholder="••••••••"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="toggle-icon"
+                @click="showPassword = !showPassword"
+                :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                :aria-pressed="showPassword"
+              >
+                <span class="material-icons">
+                  {{ showPassword ? "visibility_off" : "visibility" }}
+                </span>
+              </button>
+            </div>
+            <small v-if="errors.confirmpassword" class="error">{{
+              errors.confirmpassword
+            }}</small>
+          </label>
           <button class="btn primary" type="submit">Entrar</button>
 
-          <div class="divider">ou</div>
-
-          <div class="socials">
-            <button
-              type="button"
-              class="btn alt"
-              @click.prevent="oauth('google')"
-            >
-              Entrar com Google
-            </button>
-            <button
-              type="button"
-              class="btn alt"
-              @click.prevent="oauth('apple')"
-            >
-              Entrar com Apple
-            </button>
-          </div>
-
           <p class="signup">
-            Não tem conta? <a href="#" @click.prevent="signup">Crie uma</a>
+            Já tem conta? <a href="#" @click.prevent="signIn">Faça login</a>
           </p>
         </form>
-
-        <footer class="credit">
-          Imagem de fundo: troque por uma que remeta a finanças pessoais
-          (gráficos, cofrinho, recibos)
-        </footer>
       </section>
     </main>
   </div>
 </template>
 
-<script>
-import axios from "axios";
+<script setup>
+import { reactive, ref, getCurrentInstance } from "vue";
+const { proxy } = getCurrentInstance();
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const confirmpassword = ref("");
+const remember = ref(false);
+const showPassword = ref(false);
 
-export default {
-  name: "LoginPage",
-  data() {
-    return {
-      email: "",
-      password: "",
-      remember: false,
-      showPassword: false,
-      errors: { email: "", password: "" },
-    };
-  },
-  methods: {
-    validate() {
-      this.errors.email = "";
-      this.errors.password = "";
+const errors = reactive({
+  name: "",
+  email: "",
+  password: "",
+  confirmpassword: "",
+});
 
-      if (!this.email) this.errors.email = "E-mail é obrigatório.";
-      else if (!/^\S+@\S+\.\S+$/.test(this.email))
-        this.errors.email = "E-mail inválido.";
+function validate() {
+  errors.name = "";
+  errors.email = "";
+  errors.password = "";
+  errors.confirmpassword = "";
 
-      if (!this.password) this.errors.password = "Senha é obrigatória.";
-      else if (this.password.length < 6)
-        this.errors.password = "A senha deve ter ao menos 6 caracteres.";
+  if (!name.value) errors.name = "Campo obrigatório";
+  if (!email.value) errors.email = "E‑mail é obrigatório.";
+  else if (!/^\S+@\S+\.\S+$/.test(email.value))
+    errors.email = "E‑mail inválido.";
 
-      return !this.errors.email && !this.errors.password;
-    },
+  if (!password.value) errors.password = "Senha é obrigatória.";
+  else if (password.value.length < 6)
+    errors.password = "A senha deve ter ao menos 6 caracteres.";
 
-    async submit() {
-      if (!this.validate()) return;
+  if (confirmpassword.value !== password.value)
+    errors.confirmpassword = "As senhas devem ser iguais";
+  else if (confirmpassword.value.length === 0)
+    errors.confirmpassword = "Campo não deve ser vazio";
+  return !errors.email && !errors.password && !errors.confirmpassword;
+}
 
-      try {
-        const response = await axios.post("http://localhost:3000/users/login", {
-          email: this.email,
-          password: this.password,
-        });
+function submit() {
+  if (!validate()) return;
 
-        localStorage.setItem("token", response.data.token);
+  // Substitua por chamada real à API / store
+  console.log("Entrando com", {
+    email: email.value,
+    password: "***",
+    remember: remember.value,
+  });
+  // exemplo: await auth.signIn(email.value, password.value)
+  // redirecionar após login
+  alert("Login simulado — implemente a integração com sua API");
+}
 
-        /*LEMBRAR DE COLOCAR PARA REMOVER O TOKEN AO FAZER LOGOUT
-        
-        logout() {
-          localStorage.removeItem("token");
-          this.$router.push("/login");
-        }
-          
-        */
-
-        console.log("Login successful:", response.data);
-
-        // opcional: salvar o usuário no localStorage
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-
-        // redirecionar
-        this.$router.push("/app/dashboard");
-      } catch (err) {
-        if (err.response && err.response.data && err.response.data.error) {
-          alert(err.response.data.error);
-        } else {
-          alert("Erro ao tentar logar. Tente novamente.");
-        }
-      }
-    },
-
-    togglePassword() {
-      this.showPassword = !this.showPassword;
-    },
-
-    oauth(provider) {
-      alert(`OAuth: implementar fluxo com ${provider}`);
-    },
-
-    forgot() {
-      alert("Fluxo de recuperação de senha — implemente conforme sua rota");
-    },
-
-    signup() {
-      this.$router.push("/register");
-    },
-  },
-};
+// Navegar para registro
+function signIn() {
+  proxy.$router.push("/login");
+}
 </script>
 
 <style scoped>
@@ -322,6 +290,46 @@ input[type="text"] {
   font-size: 0.76rem;
   color: #94a3b8;
   margin-top: 0.75rem;
+}
+
+.password-row {
+  position: relative;
+  width: 100%;
+}
+
+.password-row input {
+  width: 100%;
+  padding-right: 45px; /* espaço para o botão */
+}
+
+.toggle-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.toggle-icon:hover {
+  color: #333;
+}
+
+.toggle-icon:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.material-icons {
+  font-size: 20px;
 }
 
 @media (max-width: 480px) {
