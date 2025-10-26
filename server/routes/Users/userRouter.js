@@ -6,6 +6,19 @@ const User = require("../../models/Users"); // modelo Sequelize
 
 const JWT_SECRET = "chave-super-secreta";
 
+const rateLimit = require("express-rate-limit");
+// limiter de taxa: máximo de 100 solicitações por 15 minutos por IP
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutos
+  max: 500, // máximo de 500 solicitações por IP
+  standardHeaders: true, // informa os headers RateLimit
+  legacyHeaders: false, // desativa os headers X-RateLimit
+});
+
+// Aplicar limiter de taxa a todas as rotas neste roteador
+router.use(limiter);
+
+// 🧩 Middleware de verificação do token JWT
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader)
@@ -21,8 +34,8 @@ function verifyToken(req, res, next) {
   }
 }
 
-// LOGIN
-router.post("/login", async (req, res) => {
+// ✅ LOGIN (não requer token)
+router.post("/login", limiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email } });
@@ -33,7 +46,6 @@ router.post("/login", async (req, res) => {
     if (!match)
       return res.status(401).json({ error: "E-mail ou senha inválidos." });
 
-    // ✅ Gera token válido por 1h
     const token = jwt.sign({ id: user.user_id }, JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -53,30 +65,15 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
-  try {
-    const users = await User.findAll();
-    return res.json(users);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error fetching users." });
-  }
-});
-
-router.post("/", async (req, res) => {
+// ✅ CRIAR USUÁRIO (público - registro)
+router.post("/", limiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
-    // Verifica se o e-mail já está cadastrado
     const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already registered" });
-    }
+    if (existingUser)
+      return res.status(400).json({ error: "Email já cadastrado" });
 
-    // Gera hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Cria o usuário
     const newUser = await User.create({
       name,
       email,
@@ -85,7 +82,7 @@ router.post("/", async (req, res) => {
     });
 
     res.status(201).json({
-      message: "User created successfully",
+      message: "Usuário criado com sucesso",
       user: {
         id: newUser.user_id,
         name: newUser.name,
@@ -94,8 +91,91 @@ router.post("/", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Erro ao criar usuário:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// ✅ PROTEGER todas as rotas abaixo
+router.use(verifyToken);
+
+// ✅ VISUALIZAR TODOS OS USUÁRIOS
+router.get("/", limiter, async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: ["user_id", "name", "email", "registration_date"],
+    });
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar usuários" });
+  }
+});
+
+// ✅ VISUALIZAR USUÁRIO ESPECÍFICO
+router.post("/getUserById", limiter, async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID do usuário é obrigatório." });
+    }
+
+    const user = await User.findByPk(id, {
+      attributes: ["user_id", "name", "email", "registration_date"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Erro ao buscar usuário:", error);
+    res.status(500).json({ error: "Erro ao buscar usuário no banco de dados." });
+  }
+});
+
+// ✅ ATUALIZAR USUÁRIO ESPECÍFICO
+router.put("/:id", limiter, async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+
+    const updatedData = {};
+    if (name) updatedData.name = name;
+    if (email) updatedData.email = email;
+    if (password)
+      updatedData.password_hash = await bcrypt.hash(password, 10);
+
+    await user.update(updatedData);
+
+    res.json({
+      message: "Usuário atualizado com sucesso",
+      user: {
+        id: user.user_id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao atualizar usuário" });
+  }
+});
+
+// ✅ DELETAR USUÁRIO ESPECÍFICO
+router.delete("/:id", limiter, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+
+    await user.destroy();
+    res.json({ message: "Usuário deletado com sucesso" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao deletar usuário" });
   }
 });
 

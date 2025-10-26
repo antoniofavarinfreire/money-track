@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 
 // Configuração da conexão:
 // Sequelize('nome_do_banco', 'usuário', 'senha', { ...opções });
-const sequelize = new Sequelize('MoneyTrack', 'Antonio', '041723@Av3ng3r$', {
+const sequelize = new Sequelize('MoneyTrack', 'Antonio', '10042023', {
     host: 'localhost', // Se estiver rodando na sua máquina
     dialect: 'mysql'   // Diz ao Sequelize qual banco usar
 });
