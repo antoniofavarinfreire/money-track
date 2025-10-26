@@ -46,47 +46,12 @@
             }}</small>
           </label>
 
-          <div class="row between">
-            <label class="checkbox">
-              <input type="checkbox" v-model="remember" />
-              <span>Lembrar-me</span>
-            </label>
-
-            <a href="#" class="forgot" @click.prevent="forgot"
-              >Esqueceu a senha?</a
-            >
-          </div>
-
           <button class="btn primary" type="submit">Entrar</button>
-
-          <div class="divider">ou</div>
-
-          <div class="socials">
-            <button
-              type="button"
-              class="btn alt"
-              @click.prevent="oauth('google')"
-            >
-              Entrar com Google
-            </button>
-            <button
-              type="button"
-              class="btn alt"
-              @click.prevent="oauth('apple')"
-            >
-              Entrar com Apple
-            </button>
-          </div>
 
           <p class="signup">
             Não tem conta? <a href="#" @click.prevent="signup">Crie uma</a>
           </p>
         </form>
-
-        <footer class="credit">
-          Imagem de fundo: troque por uma que remeta a finanças pessoais
-          (gráficos, cofrinho, recibos)
-        </footer>
       </section>
     </main>
   </div>
