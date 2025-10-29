@@ -4,7 +4,9 @@ import App from "./App";
 
 // router setup
 import routes from "./routes/routes";
-
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.css";
 // Plugins
 import GlobalComponents from "./globalComponents";
 import GlobalDirectives from "./globalDirectives";
