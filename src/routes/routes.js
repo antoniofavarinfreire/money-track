@@ -33,11 +33,11 @@ const routes = [
         name: "Dashboard",
         component: Dashboard,
       },
-      {
-        path: "user",
-        name: "Perfil Usuário",
-        component: UserProfile,
-      },
+      // {
+      //   path: "user",
+      //   name: "Perfil Usuário",
+      //   component: UserProfile,
+      // },
       {
         path: "expense-list",
         name: "Lista de Gastos",
