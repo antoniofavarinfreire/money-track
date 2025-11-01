@@ -18,7 +18,7 @@ const limiter = rateLimit({
 // Aplicar limiter de taxa a todas as rotas neste roteador
 router.use(limiter);
 
-// 🧩 Middleware de verificação do token JWT
+// Middleware de verificação do token JWT
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader)
@@ -34,7 +34,7 @@ function verifyToken(req, res, next) {
   }
 }
 
-// ✅ LOGIN (não requer token)
+// LOGIN (não requer token)
 router.post("/login", limiter, async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -65,7 +65,7 @@ router.post("/login", limiter, async (req, res) => {
   }
 });
 
-// ✅ CRIAR USUÁRIO (público - registro)
+// CRIAR USUÁRIO (público - registro)
 router.post("/create-user", limiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -96,10 +96,10 @@ router.post("/create-user", limiter, async (req, res) => {
   }
 });
 
-// ✅ PROTEGER todas as rotas abaixo
+// PROTEGER todas as rotas abaixo
 router.use(verifyToken);
 
-// ✅ VISUALIZAR TODOS OS USUÁRIOS
+// VISUALIZAR TODOS OS USUÁRIOS
 router.get("/view-all-users", limiter, async (req, res) => {
   try {
     const users = await User.findAll({
@@ -112,7 +112,7 @@ router.get("/view-all-users", limiter, async (req, res) => {
   }
 });
 
-// ✅ VISUALIZAR USUÁRIO ESPECÍFICO
+// VISUALIZAR USUÁRIO ESPECÍFICO
 router.post("/view-id-user", limiter, async (req, res) => {
   try {
     const { id } = req.body;
@@ -132,11 +132,13 @@ router.post("/view-id-user", limiter, async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error("Erro ao buscar usuário:", error);
-    res.status(500).json({ error: "Erro ao buscar usuário no banco de dados." });
+    res
+      .status(500)
+      .json({ error: "Erro ao buscar usuário no banco de dados." });
   }
 });
 
-// ✅ ATUALIZAR USUÁRIO ESPECÍFICO
+// ATUALIZAR USUÁRIO ESPECÍFICO
 router.put("/update-id-user/:id", limiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -146,8 +148,7 @@ router.put("/update-id-user/:id", limiter, async (req, res) => {
     const updatedData = {};
     if (name) updatedData.name = name;
     if (email) updatedData.email = email;
-    if (password)
-      updatedData.password_hash = await bcrypt.hash(password, 10);
+    if (password) updatedData.password_hash = await bcrypt.hash(password, 10);
 
     await user.update(updatedData);
 
@@ -165,7 +166,7 @@ router.put("/update-id-user/:id", limiter, async (req, res) => {
   }
 });
 
-// ✅ DELETAR USUÁRIO ESPECÍFICO
+// DELETAR USUÁRIO ESPECÍFICO
 router.delete("/delete-id-user/:id", limiter, async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -179,7 +180,7 @@ router.delete("/delete-id-user/:id", limiter, async (req, res) => {
   }
 });
 
-// ✅ VISUALIZAR O USUÁRIO LOGADO
+// VISUALIZAR O USUÁRIO LOGADO
 router.get("/view-user", limiter, async (req, res) => {
   try {
     const user = await User.findByPk(req.userId, {
@@ -194,7 +195,7 @@ router.get("/view-user", limiter, async (req, res) => {
   }
 });
 
-// ✅ ATUALIZAR O USUÁRIO LOGADO
+// ATUALIZAR O USUÁRIO LOGADO
 router.put("/update-user", limiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -204,8 +205,7 @@ router.put("/update-user", limiter, async (req, res) => {
     const updatedData = {};
     if (name) updatedData.name = name;
     if (email) updatedData.email = email;
-    if (password)
-      updatedData.password_hash = await bcrypt.hash(password, 10);
+    if (password) updatedData.password_hash = await bcrypt.hash(password, 10);
 
     await user.update(updatedData);
 
@@ -223,7 +223,7 @@ router.put("/update-user", limiter, async (req, res) => {
   }
 });
 
-// ✅ DELETAR O USUÁRIO LOGADO
+// DELETAR O USUÁRIO LOGADO
 router.delete("/delete-user", limiter, async (req, res) => {
   try {
     const user = await User.findByPk(req.userId);

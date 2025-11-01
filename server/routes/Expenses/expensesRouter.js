@@ -33,7 +33,7 @@ function verifyToken(req, res, next) {
   }
 }
 
-// ✅ Criar Expense (com novos campos)
+// Criar Expense (com novos campos)
 router.post("/create-id-expense", limiter, verifyToken, async (req, res) => {
   try {
     const {
@@ -67,7 +67,7 @@ router.post("/create-id-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Visualizar todos Expenses
+// Visualizar todos Expenses
 router.get("/view-id-all-expense", limiter, verifyToken, async (req, res) => {
   try {
     const expenses = await Expense.findAll();
@@ -78,7 +78,7 @@ router.get("/view-id-all-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Visualizar Expense específico
+// Visualizar Expense específico
 router.post("/view-id-expense", limiter, verifyToken, async (req, res) => {
   try {
     const { id } = req.body;
@@ -92,7 +92,7 @@ router.post("/view-id-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Atualizar Expense específico (com novos campos)
+// Atualizar Expense específico (com novos campos)
 router.put("/update-id-expense", limiter, verifyToken, async (req, res) => {
   try {
     const {
@@ -131,7 +131,7 @@ router.put("/update-id-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Deletar Expense específico
+// Deletar Expense específico
 router.delete("/delete-id-expense", limiter, verifyToken, async (req, res) => {
   try {
     const { expense_id } = req.body;
@@ -147,7 +147,7 @@ router.delete("/delete-id-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Criar Expense vinculado ao usuário logado (com novos campos)
+// Criar Expense vinculado ao usuário logado (com novos campos)
 router.post("/create-user-expense", limiter, verifyToken, async (req, res) => {
   try {
     const {
@@ -180,20 +180,25 @@ router.post("/create-user-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Visualizar todas as despesas do usuário logado
-router.get("/view-user-all-expenses", limiter, verifyToken, async (req, res) => {
-  try {
-    const expenses = await Expense.findAll({
-      where: { user_id: req.userId },
-    });
-    res.json(expenses);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao buscar despesas" });
+// Visualizar todas as despesas do usuário logado
+router.get(
+  "/view-user-all-expenses",
+  limiter,
+  verifyToken,
+  async (req, res) => {
+    try {
+      const expenses = await Expense.findAll({
+        where: { user_id: req.userId },
+      });
+      res.json(expenses);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Erro ao buscar despesas" });
+    }
   }
-});
+);
 
-// ✅ Visualizar despesa específica do usuário logado
+// Visualizar despesa específica do usuário logado
 router.post("/view-user-expense", limiter, verifyToken, async (req, res) => {
   try {
     const { id } = req.body;
@@ -209,7 +214,7 @@ router.post("/view-user-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Atualizar despesa do usuário logado (com novos campos)
+// Atualizar despesa do usuário logado (com novos campos)
 router.put("/update-user-expense", limiter, verifyToken, async (req, res) => {
   try {
     const {
@@ -248,26 +253,31 @@ router.put("/update-user-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Deletar despesa do usuário logado
-router.delete("/delete-user-expense", limiter, verifyToken, async (req, res) => {
-  try {
-    const { expense_id } = req.body;
+// Deletar despesa do usuário logado
+router.delete(
+  "/delete-user-expense",
+  limiter,
+  verifyToken,
+  async (req, res) => {
+    try {
+      const { expense_id } = req.body;
 
-    const expense = await Expense.findOne({
-      where: { expense_id, user_id: req.userId },
-    });
-    if (!expense)
-      return res.status(404).json({ error: "Despesa não encontrada" });
+      const expense = await Expense.findOne({
+        where: { expense_id, user_id: req.userId },
+      });
+      if (!expense)
+        return res.status(404).json({ error: "Despesa não encontrada" });
 
-    await expense.destroy();
-    res.json({ message: "Despesa deletada com sucesso" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao deletar despesa" });
+      await expense.destroy();
+      res.json({ message: "Despesa deletada com sucesso" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Erro ao deletar despesa" });
+    }
   }
-});
+);
 
-// ✅ Retornar despesas com flag de dedutibilidade
+// Retornar despesas com flag de dedutibilidade
 router.get("/with-deductible-flag", limiter, verifyToken, async (req, res) => {
   try {
     const expenses = await Expense.findAll({
@@ -298,7 +308,9 @@ router.get("/with-deductible-flag", limiter, verifyToken, async (req, res) => {
     res.json(formatted);
   } catch (error) {
     console.error("Erro ao buscar despesas com flag dedutível:", error);
-    res.status(500).json({ error: "Erro ao buscar despesas com flag dedutível." });
+    res
+      .status(500)
+      .json({ error: "Erro ao buscar despesas com flag dedutível." });
   }
 });
 

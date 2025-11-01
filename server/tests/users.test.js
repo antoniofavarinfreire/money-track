@@ -108,15 +108,16 @@ describe("Users Routes", () => {
 
     expect([200, 404, 500]).toContain(res.status);
     if (res.status === 200) {
-      expect(res.body).toHaveProperty("message", "Usuário atualizado com sucesso");
+      expect(res.body).toHaveProperty(
+        "message",
+        "Usuário atualizado com sucesso"
+      );
       expect(res.body.user).toHaveProperty("name", "Usuário Atualizado");
     }
   });
 
   it("PUT /:id: Deve falhar sem token", async () => {
-    const res = await request(app)
-      .put("/users/1")
-      .send({ name: "Sem Token" });
+    const res = await request(app).put("/users/1").send({ name: "Sem Token" });
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Token não fornecido.");

@@ -17,7 +17,7 @@ const limiter = rateLimit({
 // Aplicar limiter de taxa a todas as rotas neste roteador
 router.use(limiter);
 
-// 🔐 Middleware de verificação de token JWT
+// Middleware de verificação de token JWT
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader)
@@ -33,10 +33,10 @@ function verifyToken(req, res, next) {
   }
 }
 
-// 🔐 Todas as rotas abaixo exigem autenticação
+// Todas as rotas abaixo exigem autenticação
 router.use(verifyToken);
 
-// ✅ 1️⃣ Criar categoria de imposto de renda específica
+// Criar categoria de imposto de renda específica
 router.post("/create-category", limiter, async (req, res) => {
   try {
     const { name, deductible, description } = req.body;
@@ -67,11 +67,16 @@ router.post("/create-category", limiter, async (req, res) => {
   }
 });
 
-// ✅ 2️⃣ Visualizar todas as categorias
+// Visualizar todas as categorias
 router.get("/view-all-category", limiter, async (req, res) => {
   try {
     const categories = await IncomeTaxCategory.findAll({
-      attributes: ["income_tax_category_id", "name", "deductible", "description"],
+      attributes: [
+        "income_tax_category_id",
+        "name",
+        "deductible",
+        "description",
+      ],
     });
     res.json(categories);
   } catch (error) {
@@ -80,7 +85,7 @@ router.get("/view-all-category", limiter, async (req, res) => {
   }
 });
 
-// ✅ 3️⃣ Visualizar categoria específica via JSON
+// Visualizar categoria específica via JSON
 router.post("/view-id-category", limiter, async (req, res) => {
   try {
     const { id } = req.body;
@@ -88,7 +93,12 @@ router.post("/view-id-category", limiter, async (req, res) => {
       return res.status(400).json({ error: "ID da categoria é obrigatório." });
 
     const category = await IncomeTaxCategory.findByPk(id, {
-      attributes: ["income_tax_category_id", "name", "deductible", "description"],
+      attributes: [
+        "income_tax_category_id",
+        "name",
+        "deductible",
+        "description",
+      ],
     });
 
     if (!category)
@@ -101,7 +111,7 @@ router.post("/view-id-category", limiter, async (req, res) => {
   }
 });
 
-// ✅ 4️⃣ Atualizar categoria específica
+// Atualizar categoria específica
 router.put("/update-id-category", limiter, async (req, res) => {
   try {
     const { id, name, deductible, description } = req.body;
@@ -115,7 +125,8 @@ router.put("/update-id-category", limiter, async (req, res) => {
 
     await category.update({
       name: name ?? category.name,
-      deductible: typeof deductible !== "undefined" ? deductible : category.deductible,
+      deductible:
+        typeof deductible !== "undefined" ? deductible : category.deductible,
       description: description ?? category.description,
     });
 
@@ -129,7 +140,7 @@ router.put("/update-id-category", limiter, async (req, res) => {
   }
 });
 
-// ✅ 5️⃣ Deletar categoria específica
+// Deletar categoria específica
 router.delete("/delete-id-category", limiter, async (req, res) => {
   try {
     const { id } = req.body;
