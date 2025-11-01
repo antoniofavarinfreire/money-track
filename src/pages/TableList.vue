@@ -7,7 +7,7 @@
         <md-card>
           <md-card-content>
             <simple-table
-              :data="usuarios"
+              :data="dados"
               :columns="colunas"
               :initial-per-page="10"
               @delete="excluirUsuario"
@@ -16,125 +16,154 @@
         </md-card>
       </div>
     </div>
+    <FabButton
+      variant="primary"
+      icon="bi bi-plus"
+      title="Adicionar novo usuário"
+      @click="createNewExpense"
+    />
+    <RegistrationModal
+      v-model="modalActive"
+      :model-value="expenseRecord"
+      @save="saveExpenseRecord"
+      @cancel="cancelRegister"
+    />
   </div>
 </template>
 
 <script>
 import { SimpleTable } from "@/components";
 import { defineComponent } from "vue";
+import FabButton from "../components/Buttons/FabButton.vue";
+import RegistrationModal from "../components/Modals/RegistrationModal.vue";
 
 export default defineComponent({
   components: {
     SimpleTable,
+    FabButton,
+    RegistrationModal,
   },
   data() {
     return {
       colunas: [
-        { key: "data", label: "Data" },
-        { key: "desciption", label: "Descrição" },
-        { key: "age", label: "Valor" },
-        { key: "origin", label: "Origem" },
-        { key: "description", label: "Idade" },
-        // { key: "acoes", label: "Ações", sortable: false, width: "120px" },
+        { key: "expense_date", label: "Data" },
+        { key: "description", label: "Descrição" },
+        { key: "amount", label: "Valor" },
+        { key: "transaction_type", label: "Transação" },
+        { key: "financial_source", label: "Fonte Financeira" },
       ],
-      usuarios: [
+      dados: [
         {
-          id: 1,
-          data: "2025-10-01",
-          desciption: "Pagamento de energia elétrica",
-          email: "conta.luz@banco.com",
-          age: 320.45,
-          description: "Débito automático mensal",
-          origin: "Conta Corrente",
+          expense_date: "2025-11-01",
+          description: "Compra de materiais de escritório",
+          amount: 350.75,
+          transaction_type: "Despesa",
+          financial_source: "Conta Corrente",
         },
         {
-          id: 2,
-          data: "2025-10-03",
-          desciption: "Compra supermercado",
-          email: "cartao.master@banco.com",
-          age: 745.8,
-          description: "Compra em rede SuperMais",
-          origin: "Cartão de Crédito",
+          expense_date: "2025-11-02",
+          description: "Pagamento de energia elétrica",
+          amount: 480.9,
+          transaction_type: "Despesa",
+          financial_source: "Cartão Corporativo",
         },
         {
-          id: 3,
-          data: "2025-10-04",
-          desciption: "Transferência recebida",
-          email: "joao.silva@empresa.com",
-          age: 1500.0,
-          description: "Pagamento de serviço freelance",
-          origin: "PIX",
+          expense_date: "2025-11-03",
+          description: "Venda de equipamentos usados",
+          amount: 1200.0,
+          transaction_type: "Receita",
+          financial_source: "Conta Corrente",
         },
         {
-          id: 4,
-          data: "2025-10-07",
-          desciption: "Mensalidade academia",
-          email: "fitness@academiafit.com",
-          age: 99.9,
-          description: "Plano mensal musculação",
-          origin: "Cartão de Débito",
+          expense_date: "2025-11-04",
+          description: "Assinatura de software",
+          amount: 199.9,
+          transaction_type: "Despesa",
+          financial_source: "Cartão Corporativo",
         },
         {
-          id: 5,
-          data: "2025-10-10",
-          desciption: "Assinatura streaming",
-          email: "pagamento@streamflix.com",
-          age: 49.9,
-          description: "Cobrança automática mensal",
-          origin: "Cartão de Crédito",
+          expense_date: "2025-11-05",
+          description: "Recebimento de cliente",
+          amount: 2500.0,
+          transaction_type: "Receita",
+          financial_source: "Conta Corrente",
         },
         {
-          id: 6,
-          data: "2025-10-12",
-          desciption: "Depósito salário",
-          email: "empresa.rh@corporate.com",
-          age: 6200.0,
-          description: "Salário referente a outubro",
-          origin: "Conta Corrente",
+          expense_date: "2025-11-06",
+          description: "Compra de material de limpeza",
+          amount: 89.5,
+          transaction_type: "Despesa",
+          financial_source: "Conta Corrente",
         },
         {
-          id: 7,
-          data: "2025-10-15",
-          desciption: "Transferência enviada",
-          email: "amigo.carlos@pix.com",
-          age: 300.0,
-          description: "Empréstimo pessoal",
-          origin: "PIX",
+          expense_date: "2025-11-07",
+          description: "Pagamento de internet",
+          amount: 120.0,
+          transaction_type: "Despesa",
+          financial_source: "Cartão Corporativo",
         },
         {
-          id: 8,
-          data: "2025-10-20",
-          desciption: "Compra farmácia",
-          email: "farmacia.saude@banco.com",
-          age: 125.6,
-          description: "Medicamentos diversos",
-          origin: "Cartão de Crédito",
+          expense_date: "2025-11-08",
+          description: "Venda de serviços de consultoria",
+          amount: 1750.0,
+          transaction_type: "Receita",
+          financial_source: "Conta Corrente",
         },
         {
-          id: 9,
-          data: "2025-10-25",
-          desciption: "Tarifa bancária",
-          email: "tarifas@banco.com",
-          age: 25.0,
-          description: "Manutenção de conta",
-          origin: "Conta Corrente",
+          expense_date: "2025-11-09",
+          description: "Reembolso de despesas de viagem",
+          amount: 450.0,
+          transaction_type: "Receita",
+          financial_source: "Conta Corrente",
         },
         {
-          id: 10,
-          data: "2025-10-28",
-          desciption: "Rendimento aplicação",
-          email: "investimentos@banco.com",
-          age: 230.75,
-          description: "Lucro CDB mensal",
-          origin: "Investimento",
+          expense_date: "2025-11-10",
+          description: "Compra de suprimentos de TI",
+          amount: 670.25,
+          transaction_type: "Despesa",
+          financial_source: "Cartão Corporativo",
         },
       ],
+
+      expenseRecord: {
+        expense_date: "",
+        description: "",
+        amount: 0,
+        transaction_type: "",
+        financial_source: "",
+      },
+      modalActive: false,
+      usuarios: [],
     };
   },
   methods: {
     excluirUsuario(usuario) {
       console.log("Excluir:", usuario);
       // Sua lógica de exclusão aqui
+    },
+    createNewExpense() {
+      this.modalActive = true;
+    },
+    saveExpenseRecord(dados) {
+      console.log("Usuário salvo:", dados);
+      this.dados.push({ ...dados });
+      this.expenseRecord = {
+        expense_date: "",
+        description: "",
+        amount: 0,
+        transaction_type: "",
+        financial_source: "",
+      };
+    },
+
+    cancelRegister() {
+      this.expenseRecord = {
+        expense_date: "",
+        description: "",
+        amount: 0,
+        transaction_type: "",
+        financial_source: "",
+      };
     },
   },
 });
