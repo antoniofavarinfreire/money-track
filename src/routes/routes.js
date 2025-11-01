@@ -35,17 +35,17 @@ const routes = [
       },
       {
         path: "user",
-        name: "User Profile",
+        name: "Perfil Usuário",
         component: UserProfile,
       },
       {
-        path: "table",
-        name: "Table List",
+        path: "expense-list",
+        name: "Lista de Gastos",
         component: TableList,
       },
       {
-        path: "typography",
-        name: "Typography",
+        path: "deductibles",
+        name: "Lita de dedutiveis",
         component: Typography,
       },
     ],

@@ -7,7 +7,7 @@
       </md-field>
     </li>
     <li>
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+      <a href="#/app/dashboard" class="dropdown-toggle" data-toggle="dropdown">
         <i class="material-icons">dashboard</i>
         <p>Dashboard</p></a
       >
