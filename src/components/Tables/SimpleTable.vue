@@ -1,67 +1,328 @@
 <template>
-  <div>
-    <md-table v-model="users" :table-header-color="tableHeaderColor">
-      <md-table-row slot="md-table-row" slot-scope="{ item }">
-        <md-table-cell md-label="Name">{{ item.name }}</md-table-cell>
-        <md-table-cell md-label="Country">{{ item.country }}</md-table-cell>
-        <md-table-cell md-label="City">{{ item.city }}</md-table-cell>
-        <md-table-cell md-label="Salary">{{ item.salary }}</md-table-cell>
-      </md-table-row>
-    </md-table>
+  <div class="datatable-container">
+    <!-- Cabeçalho com busca e controle de registros -->
+    <div class="row mb-3">
+      <div class="col-sm-12 col-md-6">
+        <div class="d-flex align-items-center">
+          <label class="me-2">Mostrar</label>
+          <select
+            v-model.number="perPage"
+            class="form-select form-select-sm"
+            style="width: auto"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span class="ms-2">registros</span>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        <div class="d-flex justify-content-md-end mt-2 mt-md-0">
+          <input
+            v-model="searchQuery"
+            type="search"
+            class="form-control form-control-sm"
+            placeholder="Buscar..."
+            style="max-width: 300px"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th
+              v-for="column in columns"
+              :key="column.key"
+              @click="column.sortable !== false ? sort(column.key) : null"
+              :style="{
+                cursor: column.sortable !== false ? 'pointer' : 'default',
+                width: column.width || 'auto',
+              }"
+              class="border-0"
+            >
+              {{ column.label }}
+              <span
+                v-if="column.sortable !== false && sortKey === column.key"
+                class="ms-1"
+              >
+                <i v-if="sortOrder === 'asc'" class="bi bi-chevron-up"></i>
+                <i v-else class="bi bi-chevron-down"></i>
+              </span>
+            </th>
+            <th class="border-0" style="width: 80px">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="paginatedData.length === 0">
+            <td :colspan="columns.length" class="text-center text-muted">
+              Nenhum registro encontrado
+            </td>
+          </tr>
+          <tr
+            v-for="(item, index) in paginatedData"
+            :key="index"
+            class="table-row"
+          >
+            <td v-for="column in columns" :key="column.key">
+              <slot
+                :name="`cell-${column.key}`"
+                :item="item"
+                :value="item[column.key]"
+              >
+                {{ formatCell(item[column.key], column) }}
+              </slot>
+            </td>
+            <td class="action-cell">
+              <button
+                class="btn btn-link text-danger p-0 delete-icon"
+                @click="deleteItem(item)"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Rodapé com informações e paginação -->
+    <div class="row">
+      <div class="col-sm-12 col-md-5">
+        <div class="datatable-info">
+          Mostrando {{ startRecord }} até {{ endRecord }} de
+          {{ filteredData.length }} registros
+          <span v-if="filteredData.length !== data.length">
+            (filtrados de {{ data.length }} registros totais)
+          </span>
+        </div>
+      </div>
+      <!-- <div class="col-sm-12 col-md-7">
+        <nav>
+          <ul class="pagination justify-content-md-end mb-0 mt-2 mt-md-0">
+            <li class="page-item" :class="{ disabled: currentPage === 1 }">
+              <a
+                class="page-link"
+                href="#"
+                @click.prevent="changePage(currentPage - 1)"
+                >Anterior</a
+              >
+            </li>
+            <li
+              v-for="page in visiblePages"
+              :key="page"
+              class="page-item"
+              :class="{ active: currentPage === page }"
+            >
+              <a class="page-link" href="#" @click.prevent="changePage(page)">{{
+                page
+              }}</a>
+            </li>
+            <li
+              class="page-item"
+              :class="{ disabled: currentPage === totalPages }"
+            >
+              <a
+                class="page-link"
+                href="#"
+                @click.prevent="changePage(currentPage + 1)"
+                >Próximo</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div> -->
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "simple-table",
+  name: "Sortable-table",
   props: {
-    tableHeaderColor: {
-      type: String,
-      default: "",
+    data: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    columns: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    initialPerPage: {
+      type: Number,
+      default: 10,
     },
   },
   data() {
     return {
-      selected: [],
-      users: [
-        {
-          name: "Dakota Rice",
-          salary: "$36,738",
-          country: "Niger",
-          city: "Oud-Turnhout",
-        },
-        {
-          name: "Minerva Hooper",
-          salary: "$23,738",
-          country: "Curaçao",
-          city: "Sinaai-Waas",
-        },
-        {
-          name: "Sage Rodriguez",
-          salary: "$56,142",
-          country: "Netherlands",
-          city: "Overland Park",
-        },
-        {
-          name: "Philip Chaney",
-          salary: "$38,735",
-          country: "Korea, South",
-          city: "Gloucester",
-        },
-        {
-          name: "Doris Greene",
-          salary: "$63,542",
-          country: "Malawi",
-          city: "Feldkirchen in Kārnten",
-        },
-        {
-          name: "Mason Porter",
-          salary: "$78,615",
-          country: "Chile",
-          city: "Gloucester",
-        },
-      ],
+      searchQuery: "",
+      sortKey: "",
+      sortOrder: "asc",
+      currentPage: 1,
+      perPage: this.initialPerPage,
     };
+  },
+  computed: {
+    filteredData() {
+      let filtered = this.data;
+
+      // Aplicar busca
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        filtered = filtered.filter((item) => {
+          return this.columns.some((column) => {
+            const value = item[column.key];
+            return value && value.toString().toLowerCase().includes(query);
+          });
+        });
+      }
+
+      // Aplicar ordenação
+      if (this.sortKey) {
+        filtered = [...filtered].sort((a, b) => {
+          let aVal = a[this.sortKey];
+          let bVal = b[this.sortKey];
+
+          // Converter para string se necessário
+          if (typeof aVal === "string") aVal = aVal.toLowerCase();
+          if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+          if (aVal < bVal) return this.sortOrder === "asc" ? -1 : 1;
+          if (aVal > bVal) return this.sortOrder === "asc" ? 1 : -1;
+          return 0;
+        });
+      }
+
+      return filtered;
+    },
+    totalPages() {
+      return Math.ceil(this.filteredData.length / this.perPage);
+    },
+    paginatedData() {
+      const start = (this.currentPage - 1) * this.perPage;
+      const end = start + this.perPage;
+      return this.filteredData.slice(start, end);
+    },
+    startRecord() {
+      return this.filteredData.length === 0
+        ? 0
+        : (this.currentPage - 1) * this.perPage + 1;
+    },
+    endRecord() {
+      const end = this.currentPage * this.perPage;
+      return end > this.filteredData.length ? this.filteredData.length : end;
+    },
+    visiblePages() {
+      const pages = [];
+      const maxVisible = 5;
+      let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+      let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+      if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
+    },
+  },
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    perPage() {
+      this.currentPage = 1;
+    },
+  },
+  methods: {
+    sort(key) {
+      if (this.sortKey === key) {
+        this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
+      } else {
+        this.sortKey = key;
+        this.sortOrder = "asc";
+      }
+    },
+    changePage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+    formatCell(value, column) {
+      if (column.format && typeof column.format === "function") {
+        return column.format(value);
+      }
+      return value;
+    },
+    deleteItem(item) {
+      this.$emit("delete", item);
+    },
   },
 };
 </script>
+
+<style scoped>
+.datatable-container {
+  padding: 1rem 0;
+}
+
+.datatable-info {
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+thead th {
+  user-select: none;
+  vertical-align: middle;
+}
+
+.table-row {
+  position: relative;
+}
+
+.action-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.delete-icon {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-size: 1.1rem;
+  border: none;
+  background: none;
+}
+
+.table-row:hover .delete-icon {
+  opacity: 1;
+}
+
+.delete-icon:hover {
+  transform: scale(1.1);
+}
+
+.table-responsive {
+  margin-bottom: 1rem;
+}
+
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+  .pagination {
+    font-size: 0.875rem;
+  }
+
+  .page-link {
+    padding: 0.375rem 0.75rem;
+  }
+}
+</style>

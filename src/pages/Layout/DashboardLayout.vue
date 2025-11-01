@@ -6,33 +6,26 @@
       :sidebar-item-color="sidebarBackground"
       :sidebar-background-image="sidebarBackgroundImage"
     >
-      <mobile-menu slot="content"></mobile-menu>
       <sidebar-link to="/app/dashboard">
         <md-icon>dashboard</md-icon>
         <p>Dashboard</p>
       </sidebar-link>
-      <!-- <sidebar-link to="/user">
-        <md-icon>person</md-icon>
-        <p>User Profile</p>
-      </sidebar-link> -->
-      <sidebar-link to="/app/table">
+      <sidebar-link to="/app/expense-list">
         <md-icon>content_paste</md-icon>
-        <p>Table list</p>
+        <p>Lista Gastos</p>
       </sidebar-link>
-      <sidebar-link to="/app/typography">
+      <sidebar-link to="/app/deductibles">
         <md-icon>library_books</md-icon>
-        <p>Typography</p>
+        <p>Lista Dedutiveis</p>
+      </sidebar-link>
+      <sidebar-link to="/app/user">
+        <md-icon>person</md-icon>
+        <p>Usuário</p>
       </sidebar-link>
     </side-bar>
 
     <div class="main-panel">
       <top-navbar></top-navbar>
-
-      <fixed-plugin
-        :color.sync="sidebarBackground"
-        :image.sync="sidebarBackgroundImage"
-      >
-      </fixed-plugin>
 
       <dashboard-content> </dashboard-content>
 
@@ -45,14 +38,12 @@
 import TopNavbar from "./TopNavbar.vue";
 import ContentFooter from "./ContentFooter.vue";
 import DashboardContent from "./Content.vue";
-import MobileMenu from "@/pages/Layout/MobileMenu.vue";
 
 export default {
   components: {
     TopNavbar,
     DashboardContent,
     ContentFooter,
-    MobileMenu,
   },
   data() {
     return {
