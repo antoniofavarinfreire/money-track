@@ -10,6 +10,7 @@
               :data="dadosFormatados"
               :columns="colunas"
               :initial-per-page="10"
+              :show-delete-button="true"
               @delete="excluirUsuario"
             ></simple-table>
           </md-card-content>
