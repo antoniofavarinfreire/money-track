@@ -101,9 +101,15 @@
             Cancelar
           </button>
           <button
-            style="margin-bottom: 0px; margin-left: 10px"
+            style="
+              margin-bottom: 0px;
+              margin-left: 10px;
+              background-image: linear-gradient(60deg, #66bb6a, #43a047);
+              border-color: #43a047;
+              color: white;
+            "
             type="button"
-            class="btn btn-primary"
+            class="btn"
             @click="close(true)"
           >
             Salvar

@@ -1,6 +1,7 @@
 <template>
   <button
-    :class="['btn', 'btn-' + variant, 'fab']"
+    :class="['btn', 'fab']"
+    style="background-image: linear-gradient(60deg, #66bb6a, #43a047)"
     :style="computedStyle"
     @click="$emit('click')"
     :title="title"
@@ -8,7 +9,11 @@
     type="button"
   >
     <slot>
-      <i :class="icon" aria-hidden="true"></i>
+      <i
+        :class="icon"
+        style="font-size: 50px; color: white"
+        aria-hidden="true"
+      ></i>
     </slot>
   </button>
 </template>
@@ -17,7 +22,7 @@
 export default {
   name: "FabButton",
   props: {
-    variant: { type: String, default: "primary" }, // cor Bootstrap
+    variant: { type: String, default: "" }, // cor Bootstrap
     icon: { type: String, default: "bi bi-plus" }, // ícone padrão
     bottom: { type: String, default: "24px" },
     right: { type: String, default: "24px" },
