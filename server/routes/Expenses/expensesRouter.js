@@ -3,9 +3,12 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const Expense = require("../../models/Expenses");
 const IncomeTaxCategory = require("../../models/IncomeTax_Categories");
+const FiscalRulesLimit = require("../../models/FiscalRules");
 const JWT_SECRET = "chave-super-secreta";
 
 const rateLimit = require("express-rate-limit");
+const { deprecations } = require("sass");
+const { Op, literal } = require("sequelize");
 
 // limiter de taxa: máximo de 100 solicitações por 5 minutos por IP
 const limiter = rateLimit({
@@ -180,7 +183,7 @@ router.post("/create-user-expense", limiter, verifyToken, async (req, res) => {
   }
 });
 
-// Visualizar todas as despesas do usuário logado
+// Visualizar todas as despesas do usuário logado (com nome da categoria)
 router.get(
   "/view-user-all-expenses",
   limiter,
@@ -189,11 +192,76 @@ router.get(
     try {
       const expenses = await Expense.findAll({
         where: { user_id: req.userId },
+        include: [
+          {
+            model: IncomeTaxCategory,
+            as: "category",
+            attributes: ["name", "deductible"],
+          },
+        ],
       });
-      res.json(expenses);
+
+      console.log("🔹 Despesas encontradas:", expenses.length);
+
+      const formatted = expenses.map((e) => ({
+        expense_id: e.expense_id,
+        expense_date: e.expense_date,
+        amount: e.amount,
+        description: e.description,
+        transaction_type: e.transaction_type,
+        financial_source: e.financial_source,
+        category_name: e.category ? e.category.name : "Sem categoria",
+        is_deductible: e.category
+          ? e.category.deductible
+            ? "Sim"
+            : "Não"
+          : "—",
+      }));
+
+      res.json(formatted);
     } catch (err) {
-      console.error(err);
+      console.error("❌ Erro ao buscar despesas:", err);
       res.status(500).json({ error: "Erro ao buscar despesas" });
+    }
+  }
+);
+
+// Visualizar apenas as despesas dedutíveis do usuário logado
+router.get(
+  "/view-user-deductible-expenses",
+  limiter,
+  verifyToken,
+  async (req, res) => {
+    try {
+      const expenses = await Expense.findAll({
+        where: { user_id: req.userId },
+        include: [
+          {
+            model: IncomeTaxCategory,
+            as: "category",
+            attributes: ["name", "deductible"],
+            where: { deductible: true }, // 🔹 Filtra apenas categorias dedutíveis
+          },
+        ],
+      });
+
+      console.log("🔹 Despesas dedutíveis encontradas:", expenses.length);
+
+      const formatted = expenses.map((e) => ({
+        expense_id: e.expense_id,
+        expense_date: e.expense_date,
+        amount: e.amount,
+        description: e.description,
+        transaction_type: e.transaction_type,
+        financial_source: e.financial_source,
+        category_name: e.category ? e.category.name : "Sem categoria",
+        is_deductible: e.category?.deductible ? "Sim" : "Não",
+      }));
+
+      res.json(formatted);
+    } catch (err) {
+      console.error("❌ Erro ao buscar despesas dedutíveis:", err);
+      res.status(500).json({ error: "Erro ao buscar despesas dedutíveis" });
     }
   }
 );
@@ -311,6 +379,143 @@ router.get("/with-deductible-flag", limiter, verifyToken, async (req, res) => {
     res
       .status(500)
       .json({ error: "Erro ao buscar despesas com flag dedutível." });
+  }
+});
+
+//ALTERAR dePOIS
+
+router.get("/summary", limiter, verifyToken, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // ----------------------
+    // KPIS
+    // ----------------------
+
+    // Cartões de crédito (transaction_type contém "crédito")
+    const creditSum = await Expense.sum("amount", {
+      where: {
+        user_id: userId,
+        transaction_type: { [Op.like]: "%credito%" },
+      },
+    });
+
+    // Débitos (Vale refeição)
+    const debitSum = await Expense.sum("amount", {
+      where: {
+        user_id: userId,
+        transaction_type: { [Op.like]: "%debito%" },
+      },
+    });
+
+    // Gastos dos últimos 30 dias
+    const last30DaysSum = await Expense.sum("amount", {
+      where: {
+        user_id: userId,
+        expense_date: {
+          [Op.between]: [
+            literal("DATE_SUB(CURDATE(), INTERVAL 30 DAY)"),
+            literal("CURDATE()"),
+          ],
+        },
+      },
+    });
+
+    // Gastos dos próximos 30 dias
+    const next30DaysSum = await Expense.sum("amount", {
+      where: {
+        user_id: userId,
+        expense_date: {
+          [Op.between]: [
+            literal("CURDATE()"),
+            literal("DATE_ADD(CURDATE(), INTERVAL 30 DAY)"),
+          ],
+        },
+      },
+    });
+
+    // ----------------------
+    // TABELA: Últimos gastos cadastrados
+    // ----------------------
+    const recentExpenses = await Expense.findAll({
+      where: { user_id: userId },
+      include: [
+        {
+          model: IncomeTaxCategory,
+          as: "category",
+          attributes: ["name", "deductible"],
+        },
+      ],
+      order: [["expense_date", "DESC"]],
+      limit: 6,
+      attributes: [
+        "expense_id",
+        "description",
+        "amount",
+        "expense_date",
+        "transaction_type",
+      ],
+    });
+
+    // Formatar despesas para o front
+    const formattedExpenses = recentExpenses.map((e) => ({
+      expense_id: e.expense_id,
+      description: e.description,
+      amount: e.amount,
+      expense_date: e.expense_date,
+      transaction_type: e.transaction_type,
+      category_name: e.category ? e.category.name : "Sem categoria",
+      is_deductible:
+        e.category && e.category.deductible ? "Sim" : e.category ? "Não" : "—",
+    }));
+
+    // ----------------------
+    // FEED: Últimas atualizações das regras fiscais
+    // ----------------------
+    const recentFiscalUpdates = await FiscalRulesLimit.findAll({
+      include: [
+        {
+          model: IncomeTaxCategory,
+          as: "category",
+          attributes: ["name"],
+        },
+      ],
+      order: [["last_updated", "DESC"]],
+      limit: 6,
+      attributes: [
+        "rule_id",
+        "fiscal_year",
+        "annual_limit",
+        "monthly_limit",
+        "last_updated",
+      ],
+    });
+
+    const formattedFiscalUpdates = recentFiscalUpdates.map((rule) => ({
+      rule_id: rule.rule_id,
+      category_name: rule.category ? rule.category.name : "Desconhecida",
+      fiscal_year: rule.fiscal_year,
+      annual_limit: rule.annual_limit,
+      monthly_limit: rule.monthly_limit,
+      last_updated: rule.last_updated,
+    }));
+
+    // ----------------------
+    // Retornar tudo
+    // ----------------------
+    res.json({
+      kpis: {
+        credit_sum: creditSum || 0,
+        debit_sum: debitSum || 0,
+        last_30_days_sum: last30DaysSum || 0,
+        next_30_days_sum: next30DaysSum || 0,
+      },
+      recent_expenses: formattedExpenses,
+      recent_fiscal_updates: formattedFiscalUpdates,
+    });
+  } catch (err) {
+    console.error("❌ Erro ao carregar dados do dashboard:", err);
+    res.status(500).json({ error: "Erro ao carregar dados do dashboard" });
   }
 });
 
