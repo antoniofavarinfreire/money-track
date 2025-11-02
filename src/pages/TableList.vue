@@ -37,6 +37,7 @@ import { SimpleTable } from "@/components";
 import { defineComponent } from "vue";
 import FabButton from "../components/Buttons/FabButton.vue";
 import RegistrationModal from "../components/Modals/RegistrationModal.vue";
+import api from "@/services/api";
 
 export default defineComponent({
   components: {
@@ -52,92 +53,40 @@ export default defineComponent({
         { key: "amount", label: "Valor" },
         { key: "transaction_type", label: "Transação" },
         { key: "financial_source", label: "Fonte Financeira" },
+        { key: "category_name", label: "Categoria" },
+        { key: "is_deductible", label: "Dedutível" },
       ],
-      dados: [
-        {
-          expense_date: "2025-11-01",
-          description: "Compra de materiais de escritório",
-          amount: 350.75,
-          transaction_type: "Despesa",
-          financial_source: "Conta Corrente",
-        },
-        {
-          expense_date: "2025-11-02",
-          description: "Pagamento de energia elétrica",
-          amount: 480.9,
-          transaction_type: "Despesa",
-          financial_source: "Cartão Corporativo",
-        },
-        {
-          expense_date: "2025-11-03",
-          description: "Venda de equipamentos usados",
-          amount: 1200.0,
-          transaction_type: "Receita",
-          financial_source: "Conta Corrente",
-        },
-        {
-          expense_date: "2025-11-04",
-          description: "Assinatura de software",
-          amount: 199.9,
-          transaction_type: "Despesa",
-          financial_source: "Cartão Corporativo",
-        },
-        {
-          expense_date: "2025-11-05",
-          description: "Recebimento de cliente",
-          amount: 2500.0,
-          transaction_type: "Receita",
-          financial_source: "Conta Corrente",
-        },
-        {
-          expense_date: "2025-11-06",
-          description: "Compra de material de limpeza",
-          amount: 89.5,
-          transaction_type: "Despesa",
-          financial_source: "Conta Corrente",
-        },
-        {
-          expense_date: "2025-11-07",
-          description: "Pagamento de internet",
-          amount: 120.0,
-          transaction_type: "Despesa",
-          financial_source: "Cartão Corporativo",
-        },
-        {
-          expense_date: "2025-11-08",
-          description: "Venda de serviços de consultoria",
-          amount: 1750.0,
-          transaction_type: "Receita",
-          financial_source: "Conta Corrente",
-        },
-        {
-          expense_date: "2025-11-09",
-          description: "Reembolso de despesas de viagem",
-          amount: 450.0,
-          transaction_type: "Receita",
-          financial_source: "Conta Corrente",
-        },
-        {
-          expense_date: "2025-11-10",
-          description: "Compra de suprimentos de TI",
-          amount: 670.25,
-          transaction_type: "Despesa",
-          financial_source: "Cartão Corporativo",
-        },
-      ],
-
+      dados: [], // inicia vazio
       expenseRecord: {
         expense_date: "",
         description: "",
         amount: 0,
         transaction_type: "",
         financial_source: "",
+        vaidade_for_tax: 0,
       },
       modalActive: false,
-      usuarios: [],
+      loading: false,
+      errorMessage: "",
     };
   },
   methods: {
+    async fetchExpenses() {
+      try {
+        this.loading = true;
+        const token = localStorage.getItem("token");
+        console.log("🔹 Token no localStorage:", token);
+
+        const response = await api.get("/expenses/view-user-all-expenses");
+        console.log("🔹 Resposta do servidor:", response.data);
+        this.dados = response.data;
+      } catch (error) {
+        console.error("❌ Erro ao buscar despesas:", error.response || error);
+        this.errorMessage = "Erro ao carregar despesas.";
+      } finally {
+        this.loading = false;
+      }
+    },
     formatCurrency(value) {
       const numericValue = parseFloat(value) || 0;
       return (
@@ -178,6 +127,9 @@ export default defineComponent({
         financial_source: "",
       };
     },
+  },
+  mounted() {
+    this.fetchExpenses();
   },
   computed: {
     dadosFormatados() {
