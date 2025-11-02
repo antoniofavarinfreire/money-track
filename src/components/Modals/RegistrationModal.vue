@@ -55,6 +55,27 @@
           </div>
           <div class="mb-3">
             <label class="form-label"
+              >Categoria <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-control"
+              v-model="computedModalValue.income_tax_category_id"
+            >
+              <option value="" disabled selected>Escolha uma categoria</option>
+              <option
+                v-for="categoria in categorias"
+                :key="categoria.income_tax_category_id"
+                :value="categoria.income_tax_category_id"
+              >
+                {{ categoria.name }}
+              </option>
+            </select>
+            <div v-if="errors.income_tax_category_id" class="invalid-feedback">
+              {{ errors.income_tax_category_id }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label"
               >Ocorrência <span class="text-danger">*</span></label
             >
             <select
@@ -121,6 +142,8 @@
 </template>
 
 <script>
+import api from "@/services/api";
+
 export default {
   name: "RegistrationModal",
 
@@ -132,11 +155,21 @@ export default {
   data() {
     return {
       localVisible: this.value,
+      categorias: [],
       errors: {},
       errorMessage: "",
     };
   },
-
+  watch: {
+    value(novo) {
+      this.localVisible = novo;
+      if (novo) {
+        this.errors = {};
+        this.errorMessage = "";
+        this.buscarCategorias(); // 🔹 Carrega categorias ao abrir modal
+      }
+    },
+  },
   computed: {
     computedModalValue: {
       get() {
@@ -157,22 +190,18 @@ export default {
       );
     },
   },
-
-  watch: {
-    value(novo) {
-      this.localVisible = novo;
-      if (novo) {
-        // Limpa erros quando o modal é aberto
-        this.errors = {};
-        this.errorMessage = "";
+  methods: {
+    async buscarCategorias() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await api.get("/expenses/income-tax-categories", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.categorias = response.data;
+      } catch (error) {
+        console.error("Erro ao buscar categorias:", error.response || error);
       }
     },
-    localVisible(novo) {
-      this.$emit("input", novo);
-    },
-  },
-
-  methods: {
     validateForm() {
       this.errors = {};
       this.errorMessage = "";
@@ -207,6 +236,11 @@ export default {
 
       if (!isValid) {
         this.errorMessage = "Por favor, preencha todos os campos obrigatórios.";
+      }
+
+      if (!this.computedModalValue.income_tax_category_id) {
+        this.errors.income_tax_category_id = "A categoria é obrigatória";
+        isValid = false;
       }
 
       return isValid;

@@ -382,6 +382,20 @@ router.get("/with-deductible-flag", limiter, verifyToken, async (req, res) => {
   }
 });
 
+// Buscar todas as categorias do imposto de renda
+router.get("/income-tax-categories", verifyToken, async (req, res) => {
+  try {
+    const categories = await IncomeTax_Category.findAll({
+      attributes: ["income_tax_category_id", "name", "deductible"],
+      order: [["name", "ASC"]],
+    });
+    res.json(categories);
+  } catch (err) {
+    console.error("Erro ao buscar categorias:", err);
+    res.status(500).json({ error: "Erro ao buscar categorias" });
+  }
+});
+
 //ALTERAR dePOIS
 
 router.get("/summary", limiter, verifyToken, async (req, res) => {

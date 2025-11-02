@@ -22,6 +22,7 @@
 <script>
 import { defineComponent } from "vue";
 import { SimpleTable } from "@/components";
+import api from "@/services/api";
 
 export default defineComponent({
   name: "DeductiblesList",
@@ -41,6 +42,22 @@ export default defineComponent({
     };
   },
   methods: {
+    async fetchDeductibleExpenses() {
+      try {
+        this.loading = true;
+        const response = await api.get("/expenses/view-user-all-expenses");
+        // Filtra apenas os dedutíveis
+        this.dados = response.data.filter(
+          (item) => String(item.is_deductible).toLowerCase() === "sim"
+        );
+      } catch (error) {
+        console.error("Erro ao buscar despesas dedutíveis:", error);
+        this.errorMessage = "Erro ao carregar despesas dedutíveis.";
+      } finally {
+        this.loading = false;
+      }
+    },
+
     formatCurrency(value) {
       const numericValue = parseFloat(value) || 0;
       return (
@@ -81,6 +98,9 @@ export default defineComponent({
         financial_source: "",
       };
     },
+  },
+  mounted() {
+    this.fetchDeductibleExpenses();
   },
   computed: {
     dadosFormatados() {
