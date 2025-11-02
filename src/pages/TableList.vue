@@ -7,7 +7,7 @@
         <md-card>
           <md-card-content>
             <simple-table
-              :data="dados"
+              :data="dadosFormatados"
               :columns="colunas"
               :initial-per-page="10"
               @delete="excluirUsuario"
@@ -25,6 +25,7 @@
     <RegistrationModal
       v-model="modalActive"
       :model-value="expenseRecord"
+      @update:modelValue="updateExpenseRecord"
       @save="saveExpenseRecord"
       @cancel="cancelRegister"
     />
@@ -86,12 +87,25 @@ export default defineComponent({
         this.loading = false;
       }
     },
+    formatCurrency(value) {
+      const numericValue = parseFloat(value) || 0;
+      return (
+        "R$ " +
+        numericValue
+          .toFixed(2)
+          .replace(".", ",")
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+      );
+    },
     excluirUsuario(usuario) {
       console.log("Excluir:", usuario);
       // Sua lógica de exclusão aqui
     },
     createNewExpense() {
       this.modalActive = true;
+    },
+    updateExpenseRecord(newValue) {
+      this.expenseRecord = newValue;
     },
     saveExpenseRecord(dados) {
       console.log("Usuário salvo:", dados);
@@ -104,7 +118,6 @@ export default defineComponent({
         financial_source: "",
       };
     },
-
     cancelRegister() {
       this.expenseRecord = {
         expense_date: "",
@@ -117,6 +130,14 @@ export default defineComponent({
   },
   mounted() {
     this.fetchExpenses();
+  },
+  computed: {
+    dadosFormatados() {
+      return this.dados.map((item) => ({
+        ...item,
+        amount: this.formatCurrency(item.amount),
+      }));
+    },
   },
 });
 </script>
