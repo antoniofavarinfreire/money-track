@@ -18,10 +18,10 @@
         <md-icon>library_books</md-icon>
         <p>Lista Dedutiveis</p>
       </sidebar-link>
-      <sidebar-link to="/app/user">
+      <!-- <sidebar-link to="/app/user">
         <md-icon>person</md-icon>
         <p>Usuário</p>
-      </sidebar-link>
+      </sidebar-link> -->
     </side-bar>
 
     <div class="main-panel">
