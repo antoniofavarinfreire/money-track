@@ -10,8 +10,8 @@
           </template>
 
           <template slot="content">
-            <p class="category">Cartoes credito</p>
-            <h3 class="title">R$34,245</h3>
+            <p class="category">Cartões de crédito</p>
+            <h3 class="title">R${{ Number(kpis.credit_sum).toFixed(2) }}</h3>
           </template>
         </stats-card>
       </div>
@@ -24,8 +24,8 @@
           </template>
 
           <template slot="content">
-            <p class="category">Vale refeição</p>
-            <h3 class="title">R$34,245</h3>
+            <p class="category">Débitos</p>
+            <h3 class="title">R${{ Number(kpis.debit_sum).toFixed(2) }}</h3>
           </template>
         </stats-card>
       </div>
@@ -39,7 +39,9 @@
 
           <template slot="content">
             <p class="category">Gastos Ultimos 30 Dias</p>
-            <h3 class="title">R$34,245</h3>
+            <h3 class="title">
+              R${{ Number(kpis.last_30_days_sum).toFixed(2) }}
+            </h3>
           </template>
         </stats-card>
       </div>
@@ -53,7 +55,9 @@
 
           <template slot="content">
             <p class="category">Gastos Próximos 30 dias</p>
-            <h3 class="title">R$34,245</h3>
+            <h3 class="title">
+              R${{ Number(kpis.next_30_days_sum).toFixed(2) }}
+            </h3>
           </template>
         </stats-card>
       </div>
@@ -65,7 +69,30 @@
             <h4 class="title">Ultimos gastos cadastrados</h4>
           </md-card-header>
           <md-card-content>
-            <ordered-table table-header-color="orange"></ordered-table>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Data</th>
+                  <th>Transação</th>
+                  <th>Categoria</th>
+                  <th>Dedutível</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="expense in recentExpenses" :key="expense.expense_id">
+                  <td>{{ expense.description }}</td>
+                  <td>R${{ Number(expense.amount).toFixed(2) }}</td>
+                  <td>
+                    {{ new Date(expense.expense_date).toLocaleDateString() }}
+                  </td>
+                  <td>{{ expense.transaction_type }}</td>
+                  <td>{{ expense.category_name }}</td>
+                  <td>{{ expense.is_deductible }}</td>
+                </tr>
+              </tbody>
+            </table>
           </md-card-content>
         </md-card>
       </div>
@@ -77,7 +104,30 @@
             <h4 class="title">Ultimos atualizações das regras fiscais</h4>
           </md-card-header>
           <md-card-content>
-            <ordered-table table-header-color="green"></ordered-table>
+            <ul class="update-list">
+              <li
+                v-for="rule in recentFiscalUpdates"
+                :key="rule.rule_id"
+                class="update-item"
+              >
+                <strong>{{ rule.category_name }}</strong>
+                <br />
+                <small>
+                  Atualizado em
+                  {{ new Date(rule.last_updated).toLocaleDateString() }} — Ano
+                  fiscal: {{ rule.fiscal_year }}
+                </small>
+                <br />
+                <span>
+                  Limite anual: R${{
+                    Number(rule.annual_limit).toFixed(2) || 0
+                  }}
+                  | Limite mensal: R${{
+                    Number(rule.monthly_limit).toFixed(2) || 0
+                  }}
+                </span>
+              </li>
+            </ul>
           </md-card-content>
         </md-card>
       </div>
@@ -86,111 +136,35 @@
 </template>
 
 <script>
-import {
-  StatsCard,
-  // ChartCard,``
-  // NavTabsCard,
-  // NavTabsTable,
-  OrderedTable,
-} from "@/components";
+import { StatsCard, OrderedTable } from "@/components";
+import api from "@/services/api";
 
 export default {
-  components: {
-    StatsCard,
-    // ChartCard,
-    // NavTabsCard,
-    // NavTabsTable,
-    OrderedTable,
-  },
+  components: { StatsCard },
   data() {
     return {
-      dailySalesChart: {
-        data: {
-          labels: ["M", "T", "W", "T", "F", "S", "S"],
-          series: [[12, 17, 7, 17, 23, 18, 38]],
-        },
-        options: {
-          lineSmooth: this.$Chartist.Interpolation.cardinal({
-            tension: 0,
-          }),
-          low: 0,
-          high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-          },
-        },
+      kpis: {
+        credit_sum: 0,
+        debit_sum: 0,
+        last_30_days_sum: 0,
+        next_30_days_sum: 0,
       },
-      dataCompletedTasksChart: {
-        data: {
-          labels: ["12am", "3pm", "6pm", "9pm", "12pm", "3am", "6am", "9am"],
-          series: [[230, 750, 450, 300, 280, 240, 200, 190]],
-        },
-
-        options: {
-          lineSmooth: this.$Chartist.Interpolation.cardinal({
-            tension: 0,
-          }),
-          low: 0,
-          high: 1000, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-          },
-        },
-      },
-      emailsSubscriptionChart: {
-        data: {
-          labels: [
-            "Ja",
-            "Fe",
-            "Ma",
-            "Ap",
-            "Mai",
-            "Ju",
-            "Jul",
-            "Au",
-            "Se",
-            "Oc",
-            "No",
-            "De",
-          ],
-          series: [
-            [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
-          ],
-        },
-        options: {
-          axisX: {
-            showGrid: false,
-          },
-          low: 0,
-          high: 1000,
-          chartPadding: {
-            top: 0,
-            right: 5,
-            bottom: 0,
-            left: 0,
-          },
-        },
-        responsiveOptions: [
-          [
-            "screen and (max-width: 640px)",
-            {
-              seriesBarDistance: 5,
-              axisX: {
-                labelInterpolationFnc: function (value) {
-                  return value[0];
-                },
-              },
-            },
-          ],
-        ],
-      },
+      recentExpenses: [],
+      recentFiscalUpdates: [],
     };
+  },
+  async mounted() {
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await api.get("/expenses/summary", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      this.kpis = data.kpis;
+      this.recentExpenses = data.recent_expenses;
+      this.recentFiscalUpdates = data.recent_fiscal_updates;
+    } catch (error) {
+      console.error("Erro ao carregar dashboard:", error);
+    }
   },
 };
 </script>

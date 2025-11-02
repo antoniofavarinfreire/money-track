@@ -47,6 +47,16 @@ const Expense = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    transaction_type: {
+      type: DataTypes.ENUM("debit", "credit"),
+      allowNull: false,
+      defaultValue: "debit",
+    },
+    financial_source: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      defaultValue: "Desconhecida",
+    },
   },
   {
     tableName: "Expenses",
