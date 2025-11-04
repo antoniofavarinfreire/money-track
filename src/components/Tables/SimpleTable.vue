@@ -56,7 +56,9 @@
                 <i v-else class="bi bi-chevron-down"></i>
               </span>
             </th>
-            <th class="border-0" style="width: 80px">Ações</th>
+            <th v-if="showDeleteButton" class="border-0" style="width: 80px">
+              Ações
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -79,7 +81,7 @@
                 {{ formatCell(item[column.key], column) }}
               </slot>
             </td>
-            <td class="action-cell">
+            <td v-if="showDeleteButton" class="action-cell">
               <button
                 class="btn btn-link text-danger p-0 delete-icon"
                 @click="deleteItem(item)"
@@ -146,6 +148,11 @@
 export default {
   name: "Sortable-table",
   props: {
+    showDeleteButton: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
     data: {
       type: Array,
       required: true,
@@ -296,11 +303,22 @@ thead th {
 }
 
 .delete-icon {
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  opacity: 1; /* sempre visível */
+  color: black; /* cor padrão */
+  transition: color 0.2s ease, transform 0.2s ease;
   font-size: 1.1rem;
   border: none;
   background: none;
+}
+
+.delete-icon:hover {
+  color: red;
+  transform: scale(1.1);
+}
+
+/* Não precisa mais do efeito de hover na linha */
+.table-row:hover .delete-icon {
+  opacity: 1;
 }
 
 .table-row:hover .delete-icon {

@@ -3,7 +3,7 @@ import DashboardLayout from "@/pages/Layout/DashboardLayout.vue";
 import Dashboard from "@/pages/Dashboard.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import TableList from "@/pages/TableList.vue";
-import Typography from "@/pages/Typography.vue";
+import DeductiblesList from "@/pages/DeductiblesList.vue";
 import Login from "@/pages/Login.vue";
 import Register from "../pages/Register/RegisterNewUser.vue"; // Import do novo componente de registro
 
@@ -33,11 +33,11 @@ const routes = [
         name: "Dashboard",
         component: Dashboard,
       },
-      {
-        path: "user",
-        name: "Perfil Usuário",
-        component: UserProfile,
-      },
+      // {
+      //   path: "user",
+      //   name: "Perfil Usuário",
+      //   component: UserProfile,
+      // },
       {
         path: "expense-list",
         name: "Lista de Gastos",
@@ -46,7 +46,7 @@ const routes = [
       {
         path: "deductibles",
         name: "Lita de dedutiveis",
-        component: Typography,
+        component: DeductiblesList,
       },
     ],
   },
