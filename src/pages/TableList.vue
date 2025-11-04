@@ -142,14 +142,13 @@ export default defineComponent({
           "/expenses/create-user-expense",
           {
             expense_date: dados.expense_date,
-            description: dados.description,
+            description: dados.description || "",
             amount: dados.amount,
-            transaction_type: dados.transaction_type,
+            transaction_type: dados.transaction_type, // "debito" ou "credito"
             financial_source: dados.financial_source,
-            // Se tiver campos adicionais, inclua aqui:
             validated_for_tax: dados.validated_for_tax || false,
-            income_tax_category_id: dados.income_tax_category_id || null,
-            invoice_file_path: dados.invoice_file_path || null,
+            income_tax_category_id: dados.income_tax_category_id, // sem || null
+            invoice_file_path: dados.invoice_file_path || "",
           },
           {
             headers: {
@@ -171,8 +170,7 @@ export default defineComponent({
           financial_source: "",
           income_tax_category_id: "",
         };
-
-        alert("Despesa cadastrada com sucesso!");
+        await this.fetchExpenses();
       } catch (error) {
         console.error("❌ Erro ao cadastrar despesa:", error);
 

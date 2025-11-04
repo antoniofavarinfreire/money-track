@@ -237,4 +237,15 @@ router.delete("/delete-user", limiter, async (req, res) => {
   }
 });
 
+// LOGOUT
+router.post("/logout", verifyToken, async (req, res) => {
+  try {
+    // Opcional: você pode manter uma blacklist se quiser invalidar tokens ativos
+    res.json({ message: "Logout realizado com sucesso" });
+  } catch (error) {
+    console.error("Erro ao realizar logout:", error);
+    res.status(500).json({ error: "Erro ao realizar logout" });
+  }
+});
+
 module.exports = router;

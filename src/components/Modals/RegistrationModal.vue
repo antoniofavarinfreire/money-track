@@ -59,7 +59,7 @@
             >
             <select
               class="form-control"
-              v-model="computedModalValue.income_tax_category_id"
+              v-model.number="computedModalValue.income_tax_category_id"
             >
               <option value="" disabled selected>Escolha uma categoria</option>
               <option
@@ -83,8 +83,8 @@
               v-model="computedModalValue.transaction_type"
             >
               <option value="" disabled selected>Escolha uma Transação</option>
-              <option>Débito</option>
-              <option>Crédito</option>
+              <option value="debito">Débito</option>
+              <option value="credito">Crédito</option>
             </select>
             <div v-if="errors.transaction_type" class="invalid-feedback">
               {{ errors.transaction_type }}
@@ -101,15 +101,16 @@
               <option value="" disabled selected>
                 Escolha uma Fonte Financeira
               </option>
-              <option>Salário</option>
-              <option>Alimentação</option>
-              <option>Educação</option>
-              <option>Saúde</option>
-              <option>Cartão Crédito</option>
-              <option>Cartão Débito</option>
-              <option>Vale Alimentação</option>
-              <option>Vale Refeição</option>
-              <option>Outros</option>
+              <option value="Salário(Dinheiro)">Salário(Dinheiro)</option>
+              <option value="Cartão Crédito(BB)">Cartão Crédito(BB)</option>
+              <option value="Cartão Débito(BB)">Cartão Débito(BB)</option>
+              <option value="PIX(Santander)">PIX(Santander)</option>
+              <option value="PIX(BB)">PIX(BB)</option>
+              <option value="Vale Alimentação(Ticket)">
+                Vale Alimentação(Ticket)
+              </option>
+              <option value="Vale Refeição(Alelo)">Vale Refeição(Alelo)</option>
+              <option value="Outros">Outros</option>
             </select>
             <div v-if="errors.financial_source" class="invalid-feedback">
               {{ errors.financial_source }}
@@ -194,9 +195,12 @@ export default {
     async buscarCategorias() {
       try {
         const token = localStorage.getItem("token");
-        const response = await api.get("/expenses/income-tax-categories", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get(
+          "/income-tax-categories/view-all-category",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         this.categorias = response.data;
       } catch (error) {
         console.error("Erro ao buscar categorias:", error.response || error);

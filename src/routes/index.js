@@ -1,3 +1,4 @@
+// routes/index.js
 import Vue from "vue";
 import Router from "vue-router";
 import routes from "./routes";
@@ -9,13 +10,22 @@ const router = new Router({
   routes,
 });
 
-// ✅ Navigation Guard para proteger as rotas
+// Navigation Guard global
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
 
-  // Se a rota requer autenticação e não há token
-  if (to.matched.some((record) => record.meta.requiresAuth) && !token) {
-    next("/login");
+  // console.log para depuração
+  console.log("Rota atual:", to.fullPath, "Token:", token);
+
+  // Se a rota ou algum parent requer auth e não há token → redireciona
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+
+  if (requiresAuth && !token) {
+    console.log("Usuário não autenticado, redirecionando para /login");
+    next({ path: "/" });
+  } else if ((to.path === "/" || to.path === "/register") && token) {
+    // se já estiver logado, impede voltar para login/register
+    next({ path: "/app/dashboard" });
   } else {
     next();
   }

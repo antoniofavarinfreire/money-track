@@ -76,10 +76,10 @@ describe("Users Routes", () => {
     expect(res.body.error).toBe("Token não fornecido.");
   });
 
-  // --- POST /users/getUserById ---
-  it("POST /getUserById: Deve retornar um usuário específico", async () => {
+  // --- POST /users/view-id-user ---
+  it("POST/view-id-user: Deve retornar um usuário específico", async () => {
     const res = await request(app)
-      .post("/users/getUserById")
+      .post("/users/view-id-user")
       .set("Authorization", `Bearer ${token}`)
       .send({ id: 1 });
 
@@ -90,16 +90,16 @@ describe("Users Routes", () => {
     }
   });
 
-  it("POST /getUserById: Deve falhar sem token", async () => {
-    const res = await request(app).post("/users/getUserById").send({ id: 1 });
+  it("POST /view-id-user: Deve falhar sem token", async () => {
+    const res = await request(app).post("/users/view-id-user").send({ id: 1 });
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Token não fornecido.");
   });
 
   // --- PUT /users/:id ---
-  it("PUT /:id: Deve atualizar um usuário existente", async () => {
+  it("PUT /update-id-user/:id: Deve atualizar um usuário existente", async () => {
     const res = await request(app)
-      .put("/users/1")
+      .put("/users/update-id-user/1")
       .set("Authorization", `Bearer ${token}`)
       .send({
         name: "Usuário Atualizado",
@@ -116,17 +116,19 @@ describe("Users Routes", () => {
     }
   });
 
-  it("PUT /:id: Deve falhar sem token", async () => {
-    const res = await request(app).put("/users/1").send({ name: "Sem Token" });
+  it("PUT /update-id-user/:id: Deve falhar sem token", async () => {
+    const res = await request(app)
+      .put("/users/update-id-user/1")
+      .send({ name: "Sem Token" });
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Token não fornecido.");
   });
 
   // --- DELETE /users/:id ---
-  it("DELETE /:id: Deve deletar um usuário existente", async () => {
+  it("DELETE /delete-id-user/:id: Deve deletar um usuário existente", async () => {
     const res = await request(app)
-      .delete("/users/1")
+      .delete("/users/delete-id-user/1")
       .set("Authorization", `Bearer ${token}`);
 
     expect([200, 404, 500]).toContain(res.status);
@@ -135,8 +137,28 @@ describe("Users Routes", () => {
     }
   });
 
-  it("DELETE /:id: Deve falhar sem token", async () => {
-    const res = await request(app).delete("/users/1");
+  it("DELETE /delete-id-user/:id: Deve falhar sem token", async () => {
+    const res = await request(app).delete("/users/delete-id-user/1");
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe("Token não fornecido.");
+  });
+
+  it("POST /logout: Deve realizar logout com sucesso", async () => {
+    const res = await request(app)
+      .post("/users/logout")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect([200, 500]).toContain(res.status);
+    if (res.status === 200) {
+      expect(res.body).toHaveProperty(
+        "message",
+        "Logout realizado com sucesso"
+      );
+    }
+  });
+
+  it("POST /logout: Deve falhar sem token", async () => {
+    const res = await request(app).post("/users/logout");
     expect(res.status).toBe(401);
     expect(res.body.error).toBe("Token não fornecido.");
   });

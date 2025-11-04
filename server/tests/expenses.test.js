@@ -154,4 +154,37 @@ describe("Expenses Routes", () => {
       .set("Authorization", `Bearer ${token}`);
     expect([200, 500]).toContain(res.status);
   });
+
+  it("GET /view-user-deductible-expenses: deve listar apenas despesas dedutíveis do usuário", async () => {
+    const res = await request(app)
+      .get("/expenses/view-user-deductible-expenses")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect([200, 500]).toContain(res.status);
+    if (res.status === 200) {
+      expect(Array.isArray(res.body)).toBe(true);
+    }
+  });
+
+  it("GET /income-tax-categories: deve retornar lista de categorias de imposto de renda", async () => {
+    const res = await request(app)
+      .get("/expenses/income-tax-categories")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect([200, 500]).toContain(res.status);
+  });
+
+  it("GET /summary: deve retornar resumo de dashboard do usuário", async () => {
+    const res = await request(app)
+      .get("/expenses/summary")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect([200, 500]).toContain(res.status);
+
+    if (res.status === 200) {
+      expect(res.body).toHaveProperty("kpis");
+      expect(res.body).toHaveProperty("recent_expenses");
+      expect(res.body).toHaveProperty("recent_fiscal_updates");
+    }
+  });
 });

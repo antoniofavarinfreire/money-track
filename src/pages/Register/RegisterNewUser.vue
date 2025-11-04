@@ -88,6 +88,7 @@
 
 <script setup>
 import { reactive, ref, getCurrentInstance } from "vue";
+import axios from "axios";
 const { proxy } = getCurrentInstance();
 const name = ref("");
 const email = ref("");
@@ -95,6 +96,7 @@ const password = ref("");
 const confirmpassword = ref("");
 const remember = ref(false);
 const showPassword = ref(false);
+const loading = ref(false);
 
 const errors = reactive({
   name: "",
@@ -125,21 +127,43 @@ function validate() {
   return !errors.email && !errors.password && !errors.confirmpassword;
 }
 
-function submit() {
+async function submit() {
   if (!validate()) return;
 
-  // Substitua por chamada real à API / store
-  console.log("Entrando com", {
-    email: email.value,
-    password: "***",
-    remember: remember.value,
-  });
-  // exemplo: await auth.signIn(email.value, password.value)
-  // redirecionar após login
-  alert("Login simulado — implemente a integração com sua API");
+  try {
+    loading.value = true;
+
+    const response = await axios.post(
+      "http://localhost:3000/users/create-user", // ajuste se necessário
+      {
+        name: name.value,
+        email: email.value,
+        password: password.value,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    alert("Usuário criado com sucesso!");
+    console.log("Usuário cadastrado:", response.data.user);
+
+    // redirecionar após cadastro
+    proxy.$router.push("/login");
+  } catch (error) {
+    if (error.response?.data?.error === "Email já cadastrado") {
+      errors.email = "Este e-mail já está em uso.";
+    } else {
+      alert("Erro ao registrar usuário. Tente novamente mais tarde.");
+      console.error(error);
+    }
+  } finally {
+    loading.value = false;
+  }
 }
 
-// Navegar para registro
 function signIn() {
   proxy.$router.push("/login");
 }
