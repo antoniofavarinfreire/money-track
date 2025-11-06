@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve --open",
     "dev": "npm run serve",
-    "build": "cross-env CI=false vue-cli-service build",
+    "build": "cross-env vue-cli-service build",
     "lint": "vue-cli-service lint",
     "prettify": "prettier --write .",
     "test": "vitest",
