@@ -107,7 +107,7 @@ export default {
           
         */
 
-        console.log("Login successful:", response.data);
+        // console.log("Login successful:", response.data);
 
         // opcional: salvar o usuário no localStorage
         localStorage.setItem("user", JSON.stringify(response.data.user));

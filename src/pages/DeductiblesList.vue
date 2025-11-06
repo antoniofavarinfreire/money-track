@@ -69,7 +69,7 @@ export default defineComponent({
       );
     },
     excluirUsuario(usuario) {
-      console.log("Excluir:", usuario);
+      // console.log("Excluir:", usuario);
       // Sua lógica de exclusão aqui
     },
     createNewExpense() {
@@ -79,7 +79,7 @@ export default defineComponent({
       this.expenseRecord = newValue;
     },
     saveExpenseRecord(dados) {
-      console.log("Usuário salvo:", dados);
+      // console.log("Usuário salvo:", dados);
       this.dados.push({ ...dados });
       this.expenseRecord = {
         expense_date: "",

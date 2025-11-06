@@ -201,7 +201,7 @@ router.get(
         ],
       });
 
-      console.log("🔹 Despesas encontradas:", expenses.length);
+      // console.log("🔹 Despesas encontradas:", expenses.length);
 
       const formatted = expenses.map((e) => ({
         expense_id: e.expense_id,
@@ -245,7 +245,7 @@ router.get(
         ],
       });
 
-      console.log("🔹 Despesas dedutíveis encontradas:", expenses.length);
+      // console.log("🔹 Despesas dedutíveis encontradas:", expenses.length);
 
       const formatted = expenses.map((e) => ({
         expense_id: e.expense_id,

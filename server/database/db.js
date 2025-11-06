@@ -11,9 +11,9 @@ const sequelize = new Sequelize("MoneyTrack", "root", "10042023", {
 async function authenticate() {
   try {
     await sequelize.authenticate();
-    console.log("Conexão com MySQL estabelecida com sucesso!");
+    // console.log("Conexão com MySQL estabelecida com sucesso!");
   } catch (error) {
-    console.error("Erro ao conectar ao banco de dados:", error);
+    // console.error("Erro ao conectar ao banco de dados:", error);
   }
 }
 

@@ -75,14 +75,14 @@ export default defineComponent({
     async fetchExpenses() {
       try {
         this.loading = true;
-        const token = localStorage.getItem("token");
-        console.log("🔹 Token no localStorage:", token);
+        // const token = localStorage.getItem("token");
+        // console.log("🔹 Token no localStorage:", token);
 
         const response = await api.get("/expenses/view-user-all-expenses");
-        console.log("🔹 Resposta do servidor:", response.data);
+        // console.log("🔹 Resposta do servidor:", response.data);
         this.dados = response.data;
       } catch (error) {
-        console.error("❌ Erro ao buscar despesas:", error.response || error);
+        // console.error("❌ Erro ao buscar despesas:", error.response || error);
         this.errorMessage = "Erro ao carregar despesas.";
       } finally {
         this.loading = false;
