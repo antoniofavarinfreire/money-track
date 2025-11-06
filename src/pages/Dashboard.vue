@@ -163,7 +163,7 @@ export default {
       this.recentExpenses = data.recent_expenses;
       this.recentFiscalUpdates = data.recent_fiscal_updates;
     } catch (error) {
-      console.error("Erro ao carregar dashboard:", error);
+      // console.error("Erro ao carregar dashboard:", error);
     }
   },
 };

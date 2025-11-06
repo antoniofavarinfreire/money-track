@@ -203,7 +203,7 @@ export default {
         );
         this.categorias = response.data;
       } catch (error) {
-        console.error("Erro ao buscar categorias:", error.response || error);
+        // console.error("Erro ao buscar categorias:", error.response || error);
       }
     },
     validateForm() {
