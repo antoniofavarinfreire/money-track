@@ -22,12 +22,4 @@ app.use("/income-tax-categories", incomeTaxCategoriesRoutes);
 app.use("/expenses", expensesRoutes);
 app.use("/fiscal-rules", fiscalRulesRoutes);
 
-app.listen(3000, () => {
-  // console.log("Server running on port 3000");
-  // console.log("Users API: http://localhost:3000/users");
-  // console.log(
-  //   "Income Tax Categories API: http://localhost:3000/income-tax-categories"
-  // );
-  // console.log("Expenses API: http://localhost:3000/expenses");
-  // console.log("FiscalRules API: http://localhost:3000/fiscal-rules");
-});
+app.listen(3000, () => {});

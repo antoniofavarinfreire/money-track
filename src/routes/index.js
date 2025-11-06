@@ -14,14 +14,10 @@ const router = new Router({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
 
-  // console.log para depuração
-  // console.log("Rota atual:", to.fullPath, "Token:", token);
-
   // Se a rota ou algum parent requer auth e não há token → redireciona
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
   if (requiresAuth && !token) {
-    // console.log("Usuário não autenticado, redirecionando para /login");
     next({ path: "/" });
   } else if ((to.path === "/" || to.path === "/register") && token) {
     // se já estiver logado, impede voltar para login/register

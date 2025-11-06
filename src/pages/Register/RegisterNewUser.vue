@@ -148,7 +148,6 @@ async function submit() {
     );
 
     alert("Usuário criado com sucesso!");
-    // console.log("Usuário cadastrado:", response.data.user);
 
     // redirecionar após cadastro
     proxy.$router.push("/login");

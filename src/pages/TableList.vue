@@ -75,14 +75,11 @@ export default defineComponent({
     async fetchExpenses() {
       try {
         this.loading = true;
-        // const token = localStorage.getItem("token");
-        // console.log("🔹 Token no localStorage:", token);
 
         const response = await api.get("/expenses/view-user-all-expenses");
-        // console.log("🔹 Resposta do servidor:", response.data);
+
         this.dados = response.data;
       } catch (error) {
-        // console.error("❌ Erro ao buscar despesas:", error.response || error);
         this.errorMessage = "Erro ao carregar despesas.";
       } finally {
         this.loading = false;
@@ -135,8 +132,6 @@ export default defineComponent({
       try {
         const token = localStorage.getItem("token");
 
-        console.log("🟢 Enviando dados para API:", dados);
-
         // Chamada POST para criar a despesa
         const response = await api.post(
           "/expenses/create-user-expense",
@@ -157,7 +152,6 @@ export default defineComponent({
           }
         );
 
-        console.log("✅ Despesa criada:", response.data);
         this.dados.push(response.data);
         alert("Despesa cadastrada com sucesso!");
 

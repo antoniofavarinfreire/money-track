@@ -68,10 +68,7 @@ export default defineComponent({
           .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
       );
     },
-    excluirUsuario(usuario) {
-      // console.log("Excluir:", usuario);
-      // Sua lógica de exclusão aqui
-    },
+    excluirUsuario(usuario) {},
     createNewExpense() {
       this.modalActive = true;
     },
@@ -79,7 +76,6 @@ export default defineComponent({
       this.expenseRecord = newValue;
     },
     saveExpenseRecord(dados) {
-      // console.log("Usuário salvo:", dados);
       this.dados.push({ ...dados });
       this.expenseRecord = {
         expense_date: "",
