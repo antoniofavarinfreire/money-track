@@ -51,6 +51,7 @@ export default defineComponent({
           (item) => String(item.is_deductible).toLowerCase() === "sim"
         );
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("Erro ao buscar despesas dedutíveis:", error);
         this.errorMessage = "Erro ao carregar despesas dedutíveis.";
       } finally {

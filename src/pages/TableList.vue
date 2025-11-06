@@ -105,6 +105,7 @@ export default defineComponent({
 
         alert("Despesa deletada com sucesso!");
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("Erro ao deletar despesa:", error.response || error);
         alert(
           error.response?.data?.error ||
@@ -166,11 +167,7 @@ export default defineComponent({
         };
         await this.fetchExpenses();
       } catch (error) {
-        console.error("❌ Erro ao cadastrar despesa:", error);
-
         if (error.response) {
-          console.error("🔸 Status:", error.response.status);
-          console.error("🔸 Dados do erro:", error.response.data);
         }
 
         alert(

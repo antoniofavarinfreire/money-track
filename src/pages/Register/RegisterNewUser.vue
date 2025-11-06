@@ -156,6 +156,7 @@ async function submit() {
       errors.email = "Este e-mail já está em uso.";
     } else {
       alert("Erro ao registrar usuário. Tente novamente mais tarde.");
+      // eslint-disable-next-line no-console
       console.error(error);
     }
   } finally {
