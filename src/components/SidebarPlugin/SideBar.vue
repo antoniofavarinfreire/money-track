@@ -45,10 +45,6 @@ export default {
       type: String,
       default: "Money track",
     },
-    sidebarBackgroundImage: {
-      type: String,
-      default: require("@/assets/img/sidebar-2.jpg"),
-    },
     imgLogo: {
       type: String,
       default: require("@/assets/img/logo_money_track.png"),
