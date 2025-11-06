@@ -16,6 +16,10 @@
         <md-icon>library_books</md-icon>
         <p>Lista Dedutiveis</p>
       </sidebar-link>
+      <sidebar-link @click.native="logout" class="logout-link" to="/">
+        <md-icon>exit_to_app</md-icon>
+        <p>Sair</p>
+      </sidebar-link>
       <!-- <sidebar-link to="/app/user">
         <md-icon>person</md-icon>
         <p>Usuário</p>
@@ -36,6 +40,7 @@
 import TopNavbar from "./TopNavbar.vue";
 import ContentFooter from "./ContentFooter.vue";
 import DashboardContent from "./Content.vue";
+import api from "@/services/api";
 
 export default {
   components: {
@@ -48,6 +53,12 @@ export default {
       sidebarBackground: "green",
       sidebarBackgroundImage: require("@/assets/img/sidebar-2.jpg"),
     };
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem("token"); // limpa o token
+      this.$router.push("/"); // redireciona
+    },
   },
 };
 </script>

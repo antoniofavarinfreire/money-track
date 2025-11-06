@@ -32,6 +32,7 @@ const routes = [
         path: "dashboard",
         name: "Dashboard",
         component: Dashboard,
+        meta: { requiresAuth: true },
       },
       // {
       //   path: "user",
@@ -42,11 +43,13 @@ const routes = [
         path: "expense-list",
         name: "Lista de Gastos",
         component: TableList,
+        meta: { requiresAuth: true },
       },
       {
         path: "deductibles",
         name: "Lita de dedutiveis",
         component: DeductiblesList,
+        meta: { requiresAuth: true },
       },
     ],
   },

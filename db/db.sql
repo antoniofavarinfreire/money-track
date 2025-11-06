@@ -30,7 +30,7 @@ CREATE TABLE Expenses (
     validated_for_tax BOOLEAN DEFAULT FALSE, -- Whether documentation is valid for tax purposes
     invoice_file_path VARCHAR(255), -- Path to the uploaded invoice file
 
-    transaction_type ENUM('debit', 'credit') NOT NULL, -- Indicates if it's a debit or credit
+    transaction_type ENUM('debito', 'credito') NOT NULL, -- Indicates if it's a debit or credit
     financial_source VARCHAR(100) NOT NULL, -- Origin of the transaction (e.g., Bank, Card, Wallet)
 
     FOREIGN KEY (user_id) REFERENCES Users(user_id),

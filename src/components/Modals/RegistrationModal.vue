@@ -55,6 +55,27 @@
           </div>
           <div class="mb-3">
             <label class="form-label"
+              >Categoria <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-control"
+              v-model.number="computedModalValue.income_tax_category_id"
+            >
+              <option value="" disabled selected>Escolha uma categoria</option>
+              <option
+                v-for="categoria in categorias"
+                :key="categoria.income_tax_category_id"
+                :value="categoria.income_tax_category_id"
+              >
+                {{ categoria.name }}
+              </option>
+            </select>
+            <div v-if="errors.income_tax_category_id" class="invalid-feedback">
+              {{ errors.income_tax_category_id }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label"
               >Ocorrência <span class="text-danger">*</span></label
             >
             <select
@@ -62,8 +83,8 @@
               v-model="computedModalValue.transaction_type"
             >
               <option value="" disabled selected>Escolha uma Transação</option>
-              <option>Débito</option>
-              <option>Crédito</option>
+              <option value="debito">Débito</option>
+              <option value="credito">Crédito</option>
             </select>
             <div v-if="errors.transaction_type" class="invalid-feedback">
               {{ errors.transaction_type }}
@@ -80,15 +101,16 @@
               <option value="" disabled selected>
                 Escolha uma Fonte Financeira
               </option>
-              <option>Salário</option>
-              <option>Alimentação</option>
-              <option>Educação</option>
-              <option>Saúde</option>
-              <option>Cartão Crédito</option>
-              <option>Cartão Débito</option>
-              <option>Vale Alimentação</option>
-              <option>Vale Refeição</option>
-              <option>Outros</option>
+              <option value="Salário(Dinheiro)">Salário(Dinheiro)</option>
+              <option value="Cartão Crédito(BB)">Cartão Crédito(BB)</option>
+              <option value="Cartão Débito(BB)">Cartão Débito(BB)</option>
+              <option value="PIX(Santander)">PIX(Santander)</option>
+              <option value="PIX(BB)">PIX(BB)</option>
+              <option value="Vale Alimentação(Ticket)">
+                Vale Alimentação(Ticket)
+              </option>
+              <option value="Vale Refeição(Alelo)">Vale Refeição(Alelo)</option>
+              <option value="Outros">Outros</option>
             </select>
             <div v-if="errors.financial_source" class="invalid-feedback">
               {{ errors.financial_source }}
@@ -121,6 +143,8 @@
 </template>
 
 <script>
+import api from "@/services/api";
+
 export default {
   name: "RegistrationModal",
 
@@ -132,11 +156,21 @@ export default {
   data() {
     return {
       localVisible: this.value,
+      categorias: [],
       errors: {},
       errorMessage: "",
     };
   },
-
+  watch: {
+    value(novo) {
+      this.localVisible = novo;
+      if (novo) {
+        this.errors = {};
+        this.errorMessage = "";
+        this.buscarCategorias(); // 🔹 Carrega categorias ao abrir modal
+      }
+    },
+  },
   computed: {
     computedModalValue: {
       get() {
@@ -157,22 +191,21 @@ export default {
       );
     },
   },
-
-  watch: {
-    value(novo) {
-      this.localVisible = novo;
-      if (novo) {
-        // Limpa erros quando o modal é aberto
-        this.errors = {};
-        this.errorMessage = "";
+  methods: {
+    async buscarCategorias() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await api.get(
+          "/income-tax-categories/view-all-category",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        this.categorias = response.data;
+      } catch (error) {
+        console.error("Erro ao buscar categorias:", error.response || error);
       }
     },
-    localVisible(novo) {
-      this.$emit("input", novo);
-    },
-  },
-
-  methods: {
     validateForm() {
       this.errors = {};
       this.errorMessage = "";
@@ -207,6 +240,11 @@ export default {
 
       if (!isValid) {
         this.errorMessage = "Por favor, preencha todos os campos obrigatórios.";
+      }
+
+      if (!this.computedModalValue.income_tax_category_id) {
+        this.errors.income_tax_category_id = "A categoria é obrigatória";
+        isValid = false;
       }
 
       return isValid;

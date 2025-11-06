@@ -88,6 +88,33 @@ export default defineComponent({
         this.loading = false;
       }
     },
+    async excluirUsuario(usuario) {
+      try {
+        if (!confirm("Deseja realmente excluir esta despesa?")) return;
+
+        // Chamada DELETE para a API
+        const token = localStorage.getItem("token");
+        await api.delete("/expenses/delete-user-expense", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          data: { expense_id: usuario.expense_id }, // body da requisição
+        });
+
+        // Remove o item da lista local para atualizar a tabela
+        this.dados = this.dados.filter(
+          (item) => item.expense_id !== usuario.expense_id
+        );
+
+        alert("Despesa deletada com sucesso!");
+      } catch (error) {
+        console.error("Erro ao deletar despesa:", error.response || error);
+        alert(
+          error.response?.data?.error ||
+            "Erro ao deletar despesa. Tente novamente."
+        );
+      }
+    },
     formatCurrency(value) {
       const numericValue = parseFloat(value) || 0;
       return (
@@ -98,26 +125,65 @@ export default defineComponent({
           .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
       );
     },
-    excluirUsuario(usuario) {
-      console.log("Excluir:", usuario);
-      // Sua lógica de exclusão aqui
-    },
     createNewExpense() {
       this.modalActive = true;
     },
     updateExpenseRecord(newValue) {
       this.expenseRecord = newValue;
     },
-    saveExpenseRecord(dados) {
-      console.log("Usuário salvo:", dados);
-      this.dados.push({ ...dados });
-      this.expenseRecord = {
-        expense_date: "",
-        description: "",
-        amount: 0,
-        transaction_type: "",
-        financial_source: "",
-      };
+    async saveExpenseRecord(dados) {
+      try {
+        const token = localStorage.getItem("token");
+
+        console.log("🟢 Enviando dados para API:", dados);
+
+        // Chamada POST para criar a despesa
+        const response = await api.post(
+          "/expenses/create-user-expense",
+          {
+            expense_date: dados.expense_date,
+            description: dados.description || "",
+            amount: dados.amount,
+            transaction_type: dados.transaction_type, // "debito" ou "credito"
+            financial_source: dados.financial_source,
+            validated_for_tax: dados.validated_for_tax || false,
+            income_tax_category_id: dados.income_tax_category_id, // sem || null
+            invoice_file_path: dados.invoice_file_path || "",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("✅ Despesa criada:", response.data);
+        this.dados.push(response.data);
+        alert("Despesa cadastrada com sucesso!");
+
+        // Limpa o formulário do modal
+        this.expenseRecord = {
+          expense_date: "",
+          description: "",
+          amount: 0,
+          transaction_type: "",
+          financial_source: "",
+          income_tax_category_id: "",
+        };
+        await this.fetchExpenses();
+      } catch (error) {
+        console.error("❌ Erro ao cadastrar despesa:", error);
+
+        if (error.response) {
+          console.error("🔸 Status:", error.response.status);
+          console.error("🔸 Dados do erro:", error.response.data);
+        }
+
+        alert(
+          error.response?.data?.error ||
+            "Erro ao cadastrar despesa. Verifique o console para mais detalhes."
+        );
+      }
     },
     cancelRegister() {
       this.expenseRecord = {
