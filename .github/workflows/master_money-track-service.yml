@@ -3,7 +3,7 @@ name: Deploy Node.js API to Azure Web App
 on:
   push:
     branches:
-      - main # ou a branch que você usa para deploy
+      - master # ou a branch que você usa para deploy
 
 jobs:
   build-and-deploy:
