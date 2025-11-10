@@ -3,7 +3,7 @@ name: Deploy Node.js API to Azure Web App
 on:
   push:
     branches:
-      - master # ou a branch que você usa para deploy
+      - main # ou a branch que você usa para deploy
 
 jobs:
   build-and-deploy:
@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./server
-        run: npm ci
+        run: npm install
 
       - name: Check server folder contents
         run: |
