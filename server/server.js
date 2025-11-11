@@ -11,7 +11,10 @@ sequelize.sync();
 
 app.use(
   cors({
-    origin: "http://localhost:8080", // porta do front Vue
+    origin: [
+      "http://localhost:8080",
+      "https://money-track-service.azurewebsites.net",
+    ],
     credentials: true,
   })
 );
@@ -22,4 +25,9 @@ app.use("/income-tax-categories", incomeTaxCategoriesRoutes);
 app.use("/expenses", expensesRoutes);
 app.use("/fiscal-rules", fiscalRulesRoutes);
 
-app.listen(3000, () => {});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+
+app.get("/", (req, res) => {
+  res.send("✅ MoneyTrack API online!");
+});
