@@ -39,6 +39,19 @@ app.use(
 );
 
 app.use(express.json());
+global.dbAvailable = true;
+
+const checkDatabase = (req, res, next) => {
+  if (!global.dbAvailable && req.path !== "/" && req.path !== "/health") {
+    return res.status(503).json({
+      error: "Service temporarily unavailable",
+      message: "Database connection is not available. Please try again later.",
+    });
+  }
+  next();
+};
+
+app.use(checkDatabase);
 
 // IMPORTANTE: Registrar rotas ANTES do app.listen
 app.get("/", (req, res) => {
@@ -50,9 +63,26 @@ app.get("/", (req, res) => {
   });
 });
 
-// Health check para Azure
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "healthy" });
+app.get("/health", async (req, res) => {
+  const health = {
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: "unknown",
+  };
+
+  try {
+    await sequelize.authenticate();
+    health.database = "connected";
+    global.dbAvailable = true;
+  } catch (error) {
+    health.database = "disconnected";
+    health.dbError = error.message;
+    global.dbAvailable = false;
+  }
+
+  const statusCode = health.database === "connected" ? 200 : 503;
+  res.status(statusCode).json(health);
 });
 
 // Rotas da aplicação
@@ -68,7 +98,7 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  // console.error("Error:", err);
+  console.error("Error:", err);
   res.status(500).json({
     error: "Internal server error",
     message: process.env.NODE_ENV === "development" ? err.message : undefined,
@@ -78,34 +108,47 @@ app.use((err, req, res, next) => {
 // Porta configurada pelo Azure
 const PORT = process.env.PORT || 3000;
 
+// Função para tentar reconectar ao banco periodicamente
+function scheduleDbReconnect() {
+  setInterval(async () => {
+    if (!global.dbAvailable) {
+      try {
+        await sequelize.authenticate();
+        await sequelize.sync();
+        console.log("✅ Database reconnected successfully");
+        global.dbAvailable = true;
+      } catch (error) {
+        console.log("⚠️  Database still unavailable, will retry...");
+      }
+    }
+  }, 30000); // Tentar a cada 30 segundos
+}
+
 // Função para iniciar o servidor
-async function startServer() {
-  try {
-    // Sincronizar banco de dados
-    await sequelize.sync();
-    // console.log("✅ Database synchronized");
-
-    // Testar conexão
-    await sequelize.authenticate();
-    // console.log("✅ Database connection established");
-
-    // Iniciar servidor - CRÍTICO: usar 0.0.0.0 no Azure
-    app.listen(PORT, "0.0.0.0", () => {
-      // console.log(`✅ Server running on port ${PORT}`);
-      // console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-    });
-  } catch (error) {
-    // console.error("❌ Failed to start server:", error);
-    process.exit(1);
-  }
+// Função para tentar reconectar ao banco periodicamente
+function scheduleDbReconnect() {
+  setInterval(async () => {
+    if (!global.dbAvailable) {
+      try {
+        await sequelize.authenticate();
+        await sequelize.sync();
+        console.log("✅ Database reconnected successfully");
+        global.dbAvailable = true;
+      } catch (error) {
+        console.log("⚠️  Database still unavailable, will retry...");
+      }
+    }
+  }, 30000); // Tentar a cada 30 segundos
 }
 
 // Iniciar servidor
 startServer();
 
 // Graceful shutdown
+
+// Graceful shutdown
 process.on("SIGTERM", async () => {
-  // console.log("SIGTERM received, closing server...");
+  console.log("SIGTERM received, closing server...");
   await sequelize.close();
   process.exit(0);
 });
