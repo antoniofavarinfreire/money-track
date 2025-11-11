@@ -7,7 +7,7 @@ const FiscalRulesLimit = require("../../models/FiscalRules");
 const JWT_SECRET = "chave-super-secreta";
 
 const rateLimit = require("express-rate-limit");
-const { deprecations } = require("sass");
+
 const { Op, literal } = require("sequelize");
 
 // limiter de taxa: máximo de 100 solicitações por 5 minutos por IP
