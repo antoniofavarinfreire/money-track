@@ -75,7 +75,15 @@
               errors.confirmpassword
             }}</small>
           </label>
-          <button class="btn primary" type="submit">Registrar</button>
+          <button class="btn primary" type="submit">
+            <span
+              v-if="loading"
+              class="spinner-border spinner-border-sm mr-2"
+              role="status"
+              aria-hidden="true"
+            />
+            {{ loading ? "" : "Registrar" }}
+          </button>
 
           <p class="signup">
             Já tem conta? <a href="#" @click.prevent="signIn">Faça login</a>
@@ -94,7 +102,6 @@ const name = ref("");
 const email = ref("");
 const password = ref("");
 const confirmpassword = ref("");
-const remember = ref(false);
 const showPassword = ref(false);
 const loading = ref(false);
 
@@ -130,9 +137,8 @@ function validate() {
 async function submit() {
   if (!validate()) return;
 
+  loading.value = true;
   try {
-    loading.value = true;
-
     const response = await axios.post(
       "https://money-track-service-hqb8fshta4hzadez.eastus2-01.azurewebsites.net/users/create-user", // ajuste se necessário
       {
@@ -354,6 +360,10 @@ input[type="text"] {
 
 .material-icons {
   font-size: 20px;
+}
+
+.btn.primary {
+  transition: all 0.2s ease-in-out;
 }
 
 @media (max-width: 480px) {

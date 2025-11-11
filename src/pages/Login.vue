@@ -46,7 +46,15 @@
             }}</small>
           </label>
 
-          <button class="btn primary" type="submit">Entrar</button>
+          <button class="btn primary" type="submit">
+            <span
+              v-if="loading"
+              class="spinner-border spinner-border-sm mr-2"
+              role="status"
+              aria-hidden="true"
+            />
+            {{ loading ? "" : "Entrar" }}
+          </button>
 
           <p class="signup">
             Não tem conta? <a href="#" @click.prevent="signup">Crie uma</a>
@@ -69,6 +77,7 @@ export default {
       remember: false,
       showPassword: false,
       errors: { email: "", password: "" },
+      loading: false,
     };
   },
   methods: {
@@ -90,6 +99,8 @@ export default {
     async submit() {
       if (!this.validate()) return;
 
+      this.loading = true;
+
       try {
         const response = await axios.post(
           "https://money-track-service-hqb8fshta4hzadez.eastus2-01.azurewebsites.net/users/login",
@@ -100,15 +111,6 @@ export default {
         );
 
         localStorage.setItem("token", response.data.token);
-
-        /*LEMBRAR DE COLOCAR PARA REMOVER O TOKEN AO FAZER LOGOUT
-        
-        logout() {
-          localStorage.removeItem("token");
-          this.$router.push("/login");
-        }
-          
-        */
 
         // opcional: salvar o usuário no localStorage
         localStorage.setItem("user", JSON.stringify(response.data.user));
@@ -121,6 +123,8 @@ export default {
         } else {
           alert("Erro ao tentar logar. Tente novamente.");
         }
+      } finally {
+        this.loading = false;
       }
     },
 
