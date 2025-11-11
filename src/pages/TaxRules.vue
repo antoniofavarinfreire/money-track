@@ -67,7 +67,6 @@ export default defineComponent({
 
         this.totalNaoDedutivel = this.formatCurrency(total_nao_dedutivel);
       } catch (error) {
-        console.error("Erro ao buscar resumo fiscal:", error);
         this.errorMessage = "Erro ao carregar resumo fiscal.";
       } finally {
         this.loading = false;
