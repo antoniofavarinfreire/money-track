@@ -78,11 +78,11 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     // Sincronizar banco de dados
-    await sequelize.sync();
+    //await sequelize.sync();
     // console.log("✅ Database synchronized");
 
     // Testar conexão
-    await sequelize.authenticate();
+    //await sequelize.authenticate();
     // console.log("✅ Database connection established");
 
     // Iniciar servidor - CRÍTICO: usar 0.0.0.0 no Azure
