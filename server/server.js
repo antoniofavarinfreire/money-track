@@ -125,30 +125,42 @@ function scheduleDbReconnect() {
 }
 
 // Função para iniciar o servidor
-// Função para tentar reconectar ao banco periodicamente
-function scheduleDbReconnect() {
-  setInterval(async () => {
-    if (!global.dbAvailable) {
-      try {
-        await sequelize.authenticate();
-        await sequelize.sync();
-        console.log("✅ Database reconnected successfully");
-        global.dbAvailable = true;
-      } catch (error) {
-        console.log("⚠️  Database still unavailable, will retry...");
-      }
-    }
-  }, 30000); // Tentar a cada 30 segundos
+async function startServer() {
+  // Iniciar servidor primeiro - CRÍTICO: usar 0.0.0.0 no Azure
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+  });
+
+  // Tentar conectar ao banco de dados de forma assíncrona
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connection established");
+
+    await sequelize.sync();
+    console.log("✅ Database synchronized");
+    global.dbAvailable = true;
+  } catch (error) {
+    console.error("⚠️  Database connection failed:", error.message);
+    console.error(
+      "⚠️  Server will run without database. Check your DB configuration."
+    );
+
+    // Não fazer process.exit(1) - deixar o servidor rodar
+    // Você pode implementar uma flag global para verificar se o DB está disponível
+    global.dbAvailable = false;
+  }
+
+  // Iniciar tentativas de reconexão
+  scheduleDbReconnect();
 }
 
 // Iniciar servidor
 startServer();
 
 // Graceful shutdown
-
-// Graceful shutdown
 process.on("SIGTERM", async () => {
-  console.log("SIGTERM received, closing server...");
+  // console.log("SIGTERM received, closing server...");
   await sequelize.close();
   process.exit(0);
 });
