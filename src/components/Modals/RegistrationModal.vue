@@ -5,7 +5,7 @@
     :class="{ show: localVisible }"
     :style="{ display: localVisible ? 'block' : 'none' }"
   >
-    <div class="modal-dialog">
+    <div class="modal-dialog mt-5">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Cadastro de Despesas</h5>
