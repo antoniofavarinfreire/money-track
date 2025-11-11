@@ -4,3 +4,7 @@ package-lock.json
 /docs
 /dist
 /coverage
+
+.env
+.env.local
+.env.production

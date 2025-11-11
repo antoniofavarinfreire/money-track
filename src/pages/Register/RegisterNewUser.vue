@@ -75,7 +75,7 @@
               errors.confirmpassword
             }}</small>
           </label>
-          <button class="btn primary" type="submit">Entrar</button>
+          <button class="btn primary" type="submit">Registrar</button>
 
           <p class="signup">
             Já tem conta? <a href="#" @click.prevent="signIn">Faça login</a>
