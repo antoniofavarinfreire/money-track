@@ -91,10 +91,13 @@ export default {
       if (!this.validate()) return;
 
       try {
-        const response = await axios.post("http://localhost:3000/users/login", {
-          email: this.email,
-          password: this.password,
-        });
+        const response = await axios.post(
+          "https://money-track-service-hqb8fshta4hzadez.eastus2-01.azurewebsites.net/users/login",
+          {
+            email: this.email,
+            password: this.password,
+          }
+        );
 
         localStorage.setItem("token", response.data.token);
 
