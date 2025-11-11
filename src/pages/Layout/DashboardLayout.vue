@@ -16,6 +16,10 @@
         <md-icon>library_books</md-icon>
         <p>Lista Dedutiveis</p>
       </sidebar-link>
+      <sidebar-link to="/app/tax-rules">
+        <md-icon>balance</md-icon>
+        <p>Regras Fiscais</p>
+      </sidebar-link>
       <sidebar-link @click.native="logout" class="logout-link" to="/">
         <md-icon>exit_to_app</md-icon>
         <p>Sair</p>

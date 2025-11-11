@@ -5,7 +5,8 @@ import UserProfile from "@/pages/UserProfile.vue";
 import TableList from "@/pages/TableList.vue";
 import DeductiblesList from "@/pages/DeductiblesList.vue";
 import Login from "@/pages/Login.vue";
-import Register from "../pages/Register/RegisterNewUser.vue"; // Import do novo componente de registro
+import Register from "@/pages/Register/RegisterNewUser.vue"; // Import do novo componente de registro
+import TaxRules from "@/pages/TaxRules.vue";
 
 const routes = [
   {
@@ -49,6 +50,12 @@ const routes = [
         path: "deductibles",
         name: "Lita de dedutiveis",
         component: DeductiblesList,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "tax-rules",
+        name: "Regras Fiscais",
+        component: TaxRules,
         meta: { requiresAuth: true },
       },
     ],

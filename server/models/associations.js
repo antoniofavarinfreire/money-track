@@ -30,6 +30,12 @@ Expense.belongsTo(IncomeTaxCategory, {
   as: "category",
 });
 
+// IncomeTaxCategory -> Expense
+IncomeTaxCategory.hasMany(Expense, {
+  foreignKey: "income_tax_category_id",
+  as: "expenses",
+});
+
 module.exports = {
   IncomeTaxCategory,
   FiscalRulesLimit,

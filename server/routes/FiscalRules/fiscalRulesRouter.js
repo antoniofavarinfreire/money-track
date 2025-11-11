@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const FiscalRule = require("../../models/FiscalRules"); // Modelo Sequelize
+const IncomeTaxCategory = require("../../models/IncomeTax_Categories");
+const Expense = require("../../models/Expenses");
+const FiscalRulesLimit = require("../../models/FiscalRules");
 const JWT_SECRET = "chave-super-secreta";
+const { Op } = require("sequelize");
 
 const rateLimit = require("express-rate-limit");
 // limiter de taxa: máximo de 100 solicitações por 15 minutos por IP
@@ -169,5 +173,94 @@ router.get(
     }
   }
 );
+
+// Nova rota: resumo fiscal do usuário logado (baseado no ano vigente)
+router.get("/tax-summary", limiter, verifyToken, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const currentYear = new Date().getFullYear();
+
+    // Busca apenas categorias dedutíveis com regras fiscais e despesas do ano vigente
+    const categories = await IncomeTaxCategory.findAll({
+      where: { deductible: true }, // ✅ apenas dedutíveis
+      attributes: [
+        "income_tax_category_id",
+        "name",
+        "deductible",
+        "description",
+      ],
+      include: [
+        {
+          model: FiscalRulesLimit,
+          as: "fiscal_limits",
+          where: { fiscal_year: currentYear },
+          attributes: [
+            "rule_id",
+            "fiscal_year",
+            "annual_limit",
+            "monthly_limit",
+            "last_updated",
+          ],
+          required: false, // pode não existir limite para o ano atual
+        },
+        {
+          model: Expense,
+          as: "expenses",
+          attributes: [
+            "amount",
+            "validated_for_tax",
+            "transaction_type",
+            "expense_date",
+          ],
+          where: {
+            user_id: userId,
+            expense_date: {
+              [Op.between]: [
+                new Date(`${currentYear}-01-01`),
+                new Date(`${currentYear}-12-31`),
+              ],
+            },
+          },
+          required: false, // inclui categorias sem despesas no ano
+        },
+      ],
+    });
+
+    // Monta o resultado final
+    const result = categories.map((cat) => {
+      const fiscalRule =
+        cat.fiscal_limits.length > 0 ? cat.fiscal_limits[0] : null;
+
+      const totalGasto = cat.expenses.reduce(
+        (acc, exp) =>
+          exp.transaction_type === "debito"
+            ? acc + parseFloat(exp.amount)
+            : acc - parseFloat(exp.amount),
+        0
+      );
+
+      const teto = fiscalRule ? parseFloat(fiscalRule.annual_limit || 0) : null;
+      const diferenca = teto !== null ? teto - totalGasto : null;
+
+      return {
+        categoria_id: cat.income_tax_category_id,
+        nome: cat.name,
+        descricao: cat.description,
+        dedutivel: cat.deductible ? "Sim" : "Não", // ✅ tratamento visual
+        limite_anual: teto,
+        gasto_total: totalGasto,
+        restante_para_limite: diferenca,
+      };
+    });
+
+    res.json({
+      ano_fiscal: currentYear,
+      resumo_por_categoria: result,
+    });
+  } catch (error) {
+    console.error("Erro ao gerar resumo fiscal:", error);
+    res.status(500).json({ error: "Erro ao gerar resumo fiscal do usuário." });
+  }
+});
 
 module.exports = router;
