@@ -134,7 +134,7 @@ async function submit() {
     loading.value = true;
 
     const response = await axios.post(
-      "http://localhost:3000/users/create-user", // ajuste se necessário
+      "https://money-track-service-hqb8fshta4hzadez.eastus2-01.azurewebsites.net/users/create-user", // ajuste se necessário
       {
         name: name.value,
         email: email.value,
