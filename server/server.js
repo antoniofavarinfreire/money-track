@@ -11,10 +11,7 @@ sequelize.sync();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:8080",
-      "https://money-track-service.azurewebsites.net",
-    ],
+    origin: "http://localhost:8080", // porta do front Vue
     credentials: true,
   })
 );
