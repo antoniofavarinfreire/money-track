@@ -177,6 +177,7 @@ export default defineComponent({
       }
     },
     cancelRegister() {
+      this.modalActive = false;
       this.expenseRecord = {
         expense_date: "",
         description: "",
