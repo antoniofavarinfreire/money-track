@@ -69,7 +69,18 @@
             <h4 class="title">Ultimos gastos cadastrados</h4>
           </md-card-header>
           <md-card-content>
-            <table class="table">
+            <div
+              v-if="isLoading"
+              class="d-flex justify-content-center align-items-center"
+              style="min-height: 100px"
+            >
+              <span
+                class="spinner-border mr-2"
+                role="status"
+                aria-hidden="true"
+              />
+            </div>
+            <table v-else class="table">
               <thead>
                 <tr>
                   <th>Descrição</th>
@@ -104,6 +115,17 @@
             <h4 class="title">Ultimos atualizações das regras fiscais</h4>
           </md-card-header>
           <md-card-content>
+            <div
+              v-if="isLoading"
+              class="d-flex justify-content-center align-items-center"
+              style="min-height: 85px"
+            >
+              <span
+                class="spinner-border mr-2"
+                role="status"
+                aria-hidden="true"
+              />
+            </div>
             <ul class="update-list">
               <li
                 v-for="rule in recentFiscalUpdates"
@@ -151,9 +173,11 @@ export default {
       },
       recentExpenses: [],
       recentFiscalUpdates: [],
+      isLoading: false,
     };
   },
   async mounted() {
+    this.isLoading = true;
     try {
       const token = localStorage.getItem("token");
       const { data } = await api.get("/expenses/summary", {
@@ -164,6 +188,8 @@ export default {
       this.recentFiscalUpdates = data.recent_fiscal_updates;
     } catch (error) {
       // console.error("Erro ao carregar dashboard:", error);
+    } finally {
+      this.isLoading = false;
     }
   },
 };
