@@ -11,6 +11,7 @@
               :columns="colunas"
               :initial-per-page="10"
               :show-delete-button="true"
+              :isLoading="isLoading"
               @delete="excluirUsuario"
             ></simple-table>
           </md-card-content>
@@ -19,10 +20,24 @@
     </div>
     <FabButton
       variant="primary"
-      icon="bi bi-plus"
+      icon="spinner-border spinner-fino"
       title="Adicionar novo usuário"
       @click="createNewExpense"
-    />
+    >
+      <span
+        v-if="isLoading"
+        class="spinner-border spinner-border-sm spinner-fino"
+        role="status"
+        aria-hidden="true"
+        style="
+          width: 2rem;
+          height: 2rem;
+          border-width: 0.2em !important;
+          color: white;
+        "
+      ></span>
+      <i v-else style="font-size: 50px; color: white" class="bi bi-plus"></i>
+    </FabButton>
     <RegistrationModal
       v-model="modalActive"
       :model-value="expenseRecord"
@@ -69,13 +84,13 @@ export default defineComponent({
       modalActive: false,
       loading: false,
       errorMessage: "",
+      isLoading: false,
     };
   },
   methods: {
     async fetchExpenses() {
+      this.loading = true;
       try {
-        this.loading = true;
-
         const response = await api.get("/expenses/view-user-all-expenses");
 
         this.dados = response.data;
@@ -130,6 +145,7 @@ export default defineComponent({
       this.expenseRecord = newValue;
     },
     async saveExpenseRecord(dados) {
+      this.isLoading = true;
       try {
         const token = localStorage.getItem("token");
 
@@ -174,6 +190,9 @@ export default defineComponent({
           error.response?.data?.error ||
             "Erro ao cadastrar despesa. Verifique o console para mais detalhes."
         );
+      } finally {
+        this.isLoading = false;
+        this.modalActive = false;
       }
     },
     cancelRegister() {
@@ -200,3 +219,4 @@ export default defineComponent({
   },
 });
 </script>
+<style></style>
