@@ -11,6 +11,7 @@
               :columns="colunas"
               :initial-per-page="10"
               :show-delete-button="false"
+              :isLoading="loading"
               @delete="excluirUsuario"
             ></SimpleTable>
             <div class="mt-4" style="text-align: right; font-weight: bold">
@@ -50,8 +51,8 @@ export default defineComponent({
   },
   methods: {
     async fetchTaxSummary() {
+      this.loading = true;
       try {
-        this.loading = true;
         const response = await api.get("/fiscal-rules/tax-summary"); // ou o path correto conforme o router
         const { resumo_por_categoria, total_nao_dedutivel } = response.data;
 
