@@ -71,7 +71,6 @@ export default defineComponent({
           total_gastos_nao_dedutiveis
         );
       } catch (error) {
-        console.error("Erro ao carregar resumo fiscal:", error);
         this.errorMessage = "Erro ao carregar resumo fiscal.";
       } finally {
         this.loading = false;
