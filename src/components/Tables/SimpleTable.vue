@@ -9,6 +9,7 @@
             v-model.number="perPage"
             class="form-select form-select-sm"
             style="width: auto"
+            :disabled="isLoading"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -27,6 +28,7 @@
             class="form-control form-control-sm"
             placeholder="Buscar..."
             style="max-width: 300px"
+            :disabled="isLoading"
           />
         </div>
       </div>
@@ -40,9 +42,16 @@
             <th
               v-for="column in columns"
               :key="column.key"
-              @click="column.sortable !== false ? sort(column.key) : null"
+              @click="
+                column.sortable !== false && !isLoading
+                  ? sort(column.key)
+                  : null
+              "
               :style="{
-                cursor: column.sortable !== false ? 'pointer' : 'default',
+                cursor:
+                  column.sortable !== false && !isLoading
+                    ? 'pointer'
+                    : 'default',
                 width: column.width || 'auto',
               }"
               class="border-0"
@@ -62,12 +71,27 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-if="paginatedData.length === 0">
-            <td :colspan="columns.length" class="text-center text-muted">
+          <tr v-if="isLoading">
+            <td
+              :colspan="columns.length + (showDeleteButton ? 1 : 0)"
+              class="text-center"
+            >
+              <div
+                class="spinner-border text-primary"
+                style="color: black !important"
+              ></div>
+            </td>
+          </tr>
+          <tr v-else-if="paginatedData.length === 0">
+            <td
+              :colspan="columns.length + (showDeleteButton ? 1 : 0)"
+              class="text-center text-muted py-4"
+            >
               Nenhum registro encontrado
             </td>
           </tr>
           <tr
+            v-else
             v-for="(item, index) in paginatedData"
             :key="index"
             class="table-row"
@@ -85,6 +109,7 @@
               <button
                 class="btn btn-link text-danger p-0 delete-icon"
                 @click="deleteItem(item)"
+                :disabled="isLoading"
               >
                 <i class="bi bi-trash"></i>
               </button>
@@ -105,41 +130,6 @@
           </span>
         </div>
       </div>
-      <!-- <div class="col-sm-12 col-md-7">
-        <nav>
-          <ul class="pagination justify-content-md-end mb-0 mt-2 mt-md-0">
-            <li class="page-item" :class="{ disabled: currentPage === 1 }">
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage - 1)"
-                >Anterior</a
-              >
-            </li>
-            <li
-              v-for="page in visiblePages"
-              :key="page"
-              class="page-item"
-              :class="{ active: currentPage === page }"
-            >
-              <a class="page-link" href="#" @click.prevent="changePage(page)">{{
-                page
-              }}</a>
-            </li>
-            <li
-              class="page-item"
-              :class="{ disabled: currentPage === totalPages }"
-            >
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage + 1)"
-                >Próximo</a
-              >
-            </li>
-          </ul>
-        </nav>
-      </div> -->
     </div>
   </div>
 </template>
@@ -166,6 +156,10 @@ export default {
     initialPerPage: {
       type: Number,
       default: 10,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -303,30 +297,22 @@ thead th {
 }
 
 .delete-icon {
-  opacity: 1; /* sempre visível */
-  color: black; /* cor padrão */
+  opacity: 1;
+  color: black;
   transition: color 0.2s ease, transform 0.2s ease;
   font-size: 1.1rem;
   border: none;
   background: none;
 }
 
-.delete-icon:hover {
+.delete-icon:hover:not(:disabled) {
   color: red;
   transform: scale(1.1);
 }
 
-/* Não precisa mais do efeito de hover na linha */
-.table-row:hover .delete-icon {
-  opacity: 1;
-}
-
-.table-row:hover .delete-icon {
-  opacity: 1;
-}
-
-.delete-icon:hover {
-  transform: scale(1.1);
+.delete-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .table-responsive {
