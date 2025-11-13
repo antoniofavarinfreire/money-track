@@ -11,7 +11,7 @@
               :columns="colunas"
               :initial-per-page="10"
               :show-delete-button="true"
-              :isLoading="isLoading"
+              :isLoading="loading"
               @delete="excluirUsuario"
             ></simple-table>
           </md-card-content>
