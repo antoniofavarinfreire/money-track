@@ -15,7 +15,8 @@ require("./models/associations");
 // Configuração CORS - permite múltiplas origens
 const allowedOrigins = [
   "http://localhost:8080",
-  "https://agreeable-stone-088d1e00f.3.azurestaticapps.net", // Adicione a URL do seu frontend em produção
+  "https://agreeable-stone-088d1e00f.3.azurestaticapps.net",
+  "https://moneytrack.space", // Adicione a URL do seu frontend em produção
   process.env.FRONTEND_URL, // Variável de ambiente para flexibilidade
 ].filter(Boolean);
 
