@@ -11,6 +11,7 @@
               :columns="colunas"
               :initial-per-page="10"
               :show-delete-button="false"
+              :isLoading="loading"
               @delete="excluirUsuario"
             ></SimpleTable>
           </md-card-content>
@@ -39,10 +40,12 @@ export default defineComponent({
         { key: "financial_source", label: "Fonte Financeira" },
       ],
       dados: [],
+      loading: false,
     };
   },
   methods: {
     async fetchDeductibleExpenses() {
+      this.loading = true;
       try {
         this.loading = true;
         const response = await api.get("/expenses/view-user-all-expenses");
