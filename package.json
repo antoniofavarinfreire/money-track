@@ -19,6 +19,7 @@
     "bootstrap-icons": "^1.13.1",
     "chartist": "0.11.4",
     "core-js": "3.36.0",
+    "dayjs": "^1.11.19",
     "express": "^5.1.0",
     "google-maps": "4.3.3",
     "jsonwebtoken": "^9.0.2",

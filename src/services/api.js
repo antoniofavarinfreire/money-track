@@ -3,6 +3,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL:
     "https://money-track-service-hqb8fshta4hzadez.eastus2-01.azurewebsites.net/",
+  // "http://localhost:3000",
 });
 
 // adiciona automaticamente o token JWT a cada requisição

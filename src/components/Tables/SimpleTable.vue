@@ -135,6 +135,7 @@
 </template>
 
 <script>
+import dayjs from "dayjs";
 export default {
   name: "Sortable-table",
   props: {
@@ -260,9 +261,24 @@ export default {
       }
     },
     formatCell(value, column) {
+      // Prioridade: Se a coluna tiver uma função 'format' customizada, use-a.
+      console.log("value:", value, "column:", column);
       if (column.format && typeof column.format === "function") {
         return column.format(value);
       }
+
+      // 2. Lógica Condicional para a coluna de Data
+      if (column.key === "expense_date" && value) {
+        // Verifica se o valor é uma data e formata para 'MM/DD/YY'
+        try {
+          return dayjs(value).format("MM/DD/YY");
+        } catch (e) {
+          // Retorna o valor original se a formatação falhar
+          return value;
+        }
+      }
+
+      // Lógica padrão: retorna o valor sem formatação
       return value;
     },
     deleteItem(item) {
