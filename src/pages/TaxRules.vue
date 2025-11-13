@@ -12,8 +12,7 @@
               :initial-per-page="10"
               :show-delete-button="false"
               :isLoading="loading"
-              @delete="excluirUsuario"
-            ></SimpleTable>
+            />
             <div class="mt-4" style="text-align: right; font-weight: bold">
               Total de gastos não dedutíveis: {{ totalNaoDedutivel }}
             </div>
@@ -23,6 +22,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { defineComponent } from "vue";
 import { SimpleTable } from "@/components";
@@ -30,18 +30,16 @@ import api from "@/services/api";
 
 export default defineComponent({
   name: "TaxRules",
-  components: {
-    SimpleTable,
-  },
+  components: { SimpleTable },
   data() {
     return {
       colunas: [
-        { key: "nome", label: "Categoria" },
+        { key: "categoria", label: "Categoria" },
         { key: "descricao", label: "Descrição" },
         { key: "dedutivel", label: "Dedutível" },
-        { key: "limite_anual", label: "Teto Anual" },
-        { key: "gasto_total", label: "Total Gasto" },
-        { key: "restante_para_limite", label: "Restante" },
+        { key: "teto_anual", label: "Teto Anual" },
+        { key: "total_gasto", label: "Total Gasto" },
+        { key: "restante", label: "Restante" },
       ],
       dados: [],
       totalNaoDedutivel: "R$ 0,00",
@@ -53,20 +51,25 @@ export default defineComponent({
     async fetchTaxSummary() {
       this.loading = true;
       try {
-        const response = await api.get("/fiscal-rules/tax-summary"); // ou o path correto conforme o router
-        const { resumo_por_categoria, total_nao_dedutivel } = response.data;
+        const response = await api.get("/fiscal-rules/tax-summary");
 
+        const { resumo_por_categoria, total_gastos_nao_dedutiveis } =
+          response.data;
+
+        // Mapeia e formata os dados para exibição na tabela
         this.dados = resumo_por_categoria.map((item) => ({
-          ...item,
-          limite_anual: this.formatCurrency(item.limite_anual),
-          gasto_total: this.formatCurrency(item.gasto_total),
-          restante_para_limite:
-            item.restante_para_limite !== null
-              ? this.formatCurrency(item.restante_para_limite)
-              : "—",
+          categoria: item.categoria,
+          descricao: item.descricao,
+          dedutivel: item.dedutivel,
+          teto_anual: this.formatCurrency(item.teto_anual),
+          total_gasto: this.formatCurrency(item.total_gasto),
+          restante: this.formatCurrency(item.restante),
         }));
 
-        this.totalNaoDedutivel = this.formatCurrency(total_nao_dedutivel);
+        // Total de gastos não dedutíveis
+        this.totalNaoDedutivel = this.formatCurrency(
+          total_gastos_nao_dedutiveis
+        );
       } catch (error) {
         this.errorMessage = "Erro ao carregar resumo fiscal.";
       } finally {
@@ -84,42 +87,13 @@ export default defineComponent({
           .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
       );
     },
-    excluirUsuario(usuario) {},
-    createNewExpense() {
-      this.modalActive = true;
-    },
-    updateExpenseRecord(newValue) {
-      this.expenseRecord = newValue;
-    },
-    saveExpenseRecord(dados) {
-      this.dados.push({ ...dados });
-      this.expenseRecord = {
-        expense_date: "",
-        description: "",
-        amount: 0,
-        transaction_type: "",
-        financial_source: "",
-      };
-    },
-    cancelRegister() {
-      this.expenseRecord = {
-        expense_date: "",
-        description: "",
-        amount: 0,
-        transaction_type: "",
-        financial_source: "",
-      };
-    },
   },
   mounted() {
     this.fetchTaxSummary();
   },
   computed: {
     dadosFormatados() {
-      return this.dados.map((item) => ({
-        ...item,
-        amount: this.formatCurrency(item.amount),
-      }));
+      return this.dados;
     },
   },
 });

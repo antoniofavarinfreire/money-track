@@ -135,6 +135,7 @@
 </template>
 
 <script>
+import dayjs from "dayjs";
 export default {
   name: "Sortable-table",
   props: {
@@ -263,6 +264,16 @@ export default {
       if (column.format && typeof column.format === "function") {
         return column.format(value);
       }
+
+      if (column.key === "expense_date" && value) {
+        try {
+          return dayjs(value).format("MM/DD/YY");
+        } catch (e) {
+          return value;
+        }
+      }
+
+      // Lógica padrão: retorna o valor sem formatação
       return value;
     },
     deleteItem(item) {

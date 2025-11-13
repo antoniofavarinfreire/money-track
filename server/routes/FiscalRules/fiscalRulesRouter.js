@@ -180,9 +180,7 @@ router.get("/tax-summary", limiter, verifyToken, async (req, res) => {
     const userId = req.userId;
     const currentYear = new Date().getFullYear();
 
-    // Busca apenas categorias dedutíveis com regras fiscais e despesas do ano vigente
     const categories = await IncomeTaxCategory.findAll({
-      where: { deductible: true }, // ✅ apenas dedutíveis
       attributes: [
         "income_tax_category_id",
         "name",
@@ -194,24 +192,13 @@ router.get("/tax-summary", limiter, verifyToken, async (req, res) => {
           model: FiscalRulesLimit,
           as: "fiscal_limits",
           where: { fiscal_year: currentYear },
-          attributes: [
-            "rule_id",
-            "fiscal_year",
-            "annual_limit",
-            "monthly_limit",
-            "last_updated",
-          ],
-          required: false, // pode não existir limite para o ano atual
+          attributes: ["annual_limit"],
+          required: false,
         },
         {
           model: Expense,
           as: "expenses",
-          attributes: [
-            "amount",
-            "validated_for_tax",
-            "transaction_type",
-            "expense_date",
-          ],
+          attributes: ["amount", "transaction_type", "expense_date"],
           where: {
             user_id: userId,
             expense_date: {
@@ -221,41 +208,55 @@ router.get("/tax-summary", limiter, verifyToken, async (req, res) => {
               ],
             },
           },
-          required: false, // inclui categorias sem despesas no ano
+          required: false,
         },
       ],
     });
 
-    // Monta o resultado final
-    const result = categories.map((cat) => {
+    // 🔹 Separa dedutíveis e não dedutíveis
+    const dedutiveis = categories.filter((c) => c.deductible === true);
+    const naoDedutiveis = categories.filter((c) => c.deductible === false);
+
+    // 🔹 Monta o resumo das dedutíveis
+    const resumoPorCategoria = dedutiveis.map((cat) => {
       const fiscalRule =
         cat.fiscal_limits.length > 0 ? cat.fiscal_limits[0] : null;
 
-      const totalGasto = cat.expenses.reduce(
-        (acc, exp) =>
-          exp.transaction_type === "debito"
-            ? acc + parseFloat(exp.amount)
-            : acc - parseFloat(exp.amount),
-        0
-      );
+      // Soma apenas créditos (gastos)
+      const totalGasto = cat.expenses
+        .filter((exp) => exp.transaction_type === "credito")
+        .reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0);
 
-      const teto = fiscalRule ? parseFloat(fiscalRule.annual_limit || 0) : null;
-      const diferenca = teto !== null ? teto - totalGasto : null;
+      const teto = fiscalRule ? parseFloat(fiscalRule.annual_limit || 0) : 0;
+      const restante = Math.max(teto - totalGasto, 0);
 
       return {
-        categoria_id: cat.income_tax_category_id,
-        nome: cat.name,
+        categoria: cat.name,
         descricao: cat.description,
-        dedutivel: cat.deductible ? "Sim" : "Não", // ✅ tratamento visual
-        limite_anual: teto,
-        gasto_total: totalGasto,
-        restante_para_limite: diferenca,
+        dedutivel: "Sim",
+        teto_anual: teto,
+        total_gasto: totalGasto,
+        restante: restante,
       };
     });
 
+    // 🔹 Soma total de gastos não dedutíveis (somente créditos)
+    const totalNaoDedutivel = naoDedutiveis.reduce((acc, cat) => {
+      const totalGasto = cat.expenses
+        .filter(
+          (exp) =>
+            exp.transaction_type &&
+            exp.transaction_type.toLowerCase() === "credito"
+        )
+        .reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0);
+      return acc + totalGasto;
+    }, 0);
+
+    // 🔹 Retorno final
     res.json({
       ano_fiscal: currentYear,
-      resumo_por_categoria: result,
+      resumo_por_categoria: resumoPorCategoria,
+      total_gastos_nao_dedutiveis: totalNaoDedutivel,
     });
   } catch (error) {
     console.error("Erro ao gerar resumo fiscal:", error);
