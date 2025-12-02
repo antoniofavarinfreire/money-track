@@ -101,15 +101,11 @@
               <option value="" disabled selected>
                 Escolha uma Fonte Financeira
               </option>
-              <option value="Salário(Dinheiro)">Salário(Dinheiro)</option>
-              <option value="Cartão Crédito(BB)">Cartão Crédito(BB)</option>
-              <option value="Cartão Débito(BB)">Cartão Débito(BB)</option>
-              <option value="PIX(Santander)">PIX(Santander)</option>
-              <option value="PIX(BB)">PIX(BB)</option>
-              <option value="Vale Alimentação(Ticket)">
-                Vale Alimentação(Ticket)
-              </option>
-              <option value="Vale Refeição(Alelo)">Vale Refeição(Alelo)</option>
+              <option value="Salário">Salário</option>
+              <option value="Cartão Crédito">Cartão Crédito</option>
+              <option value="Cartão Débito">Cartão Débito</option>
+              <option value="PIX">PIX</option>
+              <option value="Vale Alimentação">Vale Alimentação</option>
               <option value="Outros">Outros</option>
             </select>
             <div v-if="errors.financial_source" class="invalid-feedback">
