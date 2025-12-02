@@ -36,6 +36,11 @@ Proporcionar aos usuários uma ferramenta eficaz para monitorar e planejar suas 
 
 ## Documentação do Sistema
 
+### Credenciais de demonstração
+Para testar o sistema:
+- Email: teste@moneytrack.com.br
+- Senha: 123456
+
 ### Tela de Login
 
 Ações:
