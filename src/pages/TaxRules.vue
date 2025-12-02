@@ -65,7 +65,6 @@ export default defineComponent({
           total_gasto: this.formatCurrency(item.total_gasto),
           restante: this.formatCurrency(item.restante),
         }));
-        console.log(total_gastos_nao_dedutiveis);
         // Total de gastos não dedutíveis
         this.totalNaoDedutivel = this.formatCurrency(
           total_gastos_nao_dedutiveis
